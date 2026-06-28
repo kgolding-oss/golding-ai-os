@@ -1,17 +1,24 @@
 :root {
   color-scheme: dark;
-  --bg: #08111f;
-  --panel: rgba(15, 27, 47, 0.82);
-  --panel-strong: rgba(21, 37, 64, 0.95);
-  --line: rgba(148, 163, 184, 0.2);
-  --text: #e5edf8;
-  --muted: #9fb0c8;
-  --gold: #d8b25e;
-  --blue: #6aa6ff;
-  --green: #74d7a7;
-  --red: #ff8b8b;
+  --executive-emerald: #103F35;
+  --heritage-green: #1C4F41;
+  --forest-shadow: #0C2E29;
+  --executive-gold: #C7A24A;
+  --rich-gold: #B78A2D;
+  --champagne-gold: #D9BF72;
+  --ivory: #F6F4EE;
+  --midnight: #081616;
+  --bg: var(--midnight);
+  --panel: rgba(16, 63, 53, 0.82);
+  --panel-strong: rgba(12, 46, 41, 0.95);
+  --line: rgba(217, 191, 114, 0.24);
+  --text: var(--ivory);
+  --muted: rgba(246, 244, 238, 0.72);
+  --gold: var(--executive-gold);
+  --blue: var(--champagne-gold);
+  --green: #8fd8b8;
+  --red: #ff9d90;
 }
-
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
@@ -20,9 +27,9 @@ body {
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(216, 178, 94, 0.18), transparent 34rem),
-    radial-gradient(circle at top right, rgba(106, 166, 255, 0.16), transparent 30rem),
-    linear-gradient(135deg, #050914 0%, var(--bg) 48%, #0f172a 100%);
+    radial-gradient(circle at top left, rgba(199, 162, 74, 0.24), transparent 34rem),
+    radial-gradient(circle at top right, rgba(28, 79, 65, 0.36), transparent 30rem),
+    linear-gradient(135deg, var(--forest-shadow) 0%, var(--bg) 48%, var(--executive-emerald) 100%);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -66,7 +73,7 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 
 .heroActions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 .button { border-radius: 999px; padding: 13px 18px; font-weight: 800; }
-.primary { background: var(--gold); color: #111827; }
+.primary { background: var(--gold); color: var(--midnight); }
 .secondary { border: 1px solid var(--line); background: rgba(255,255,255,0.04); }
 .statusCard { padding: 24px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel-strong); }
 .statusCard span, .metric span, .row span { display: block; color: var(--muted); font-size: 0.9rem; }
@@ -102,4 +109,67 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 @media (max-width: 920px) {
   .hero, .twoColumn, .metrics, .laneGrid { grid-template-columns: 1fr; }
   .shell { width: min(100% - 20px, 720px); padding: 10px 0; }
+}
+
+
+.topNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 16px 20px;
+}
+
+.topNav span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.authShell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.authCard {
+  width: min(100%, 620px);
+  padding: clamp(28px, 6vw, 48px);
+}
+
+.authCard h1 {
+  font-size: clamp(2.2rem, 7vw, 4rem);
+}
+
+.authForm {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.authForm label {
+  display: grid;
+  gap: 8px;
+  color: var(--champagne-gold);
+  font-weight: 800;
+}
+
+.authForm input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(246, 244, 238, 0.08);
+  color: var(--text);
+  font: inherit;
+  padding: 14px 16px;
+}
+
+.authError {
+  border: 1px solid rgba(255, 157, 144, 0.4);
+  border-radius: 16px;
+  background: rgba(255, 157, 144, 0.12);
+  color: #ffd7d1;
+  padding: 12px 14px;
 }
