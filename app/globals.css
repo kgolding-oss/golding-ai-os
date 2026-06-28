@@ -173,3 +173,25 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
   color: #ffd7d1;
   padding: 12px 14px;
 }
+.navLinks { display: flex; flex-wrap: wrap; gap: 10px; color: var(--champagne-gold); font-weight: 800; }
+.executiveShell .hero { margin-bottom: 18px; }
+.threeColumn { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.widget, .pageHeader, .crudForm, .recordCard, .healthCard { padding: 24px; }
+.emptyState { color: var(--muted); }
+.pageHeader { margin-bottom: 18px; }
+.pageHeader h1 { font-size: clamp(2.2rem, 6vw, 4.8rem); }
+.crudForm { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.crudForm label { display: grid; gap: 7px; color: var(--champagne-gold); font-size: .78rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+.crudForm input, .decisionBar input { width: 100%; border: 1px solid var(--line); border-radius: 14px; background: rgba(246,244,238,.08); color: var(--text); padding: 12px 13px; }
+.crudForm .check { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; }
+.crudForm .check input { width: auto; }
+.recordGrid, .healthGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.recordCard h2, .healthCard h2 { margin-bottom: 10px; }
+.recordCard p, .healthCard p, .healthCard small { color: var(--muted); line-height: 1.55; }
+.decisionBar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.decisionBar button { border: 1px solid var(--line); border-radius: 999px; background: rgba(199,162,74,.15); color: var(--ivory); padding: 8px 12px; font-weight: 800; }
+.healthDot { display: inline-block; width: 12px; height: 12px; border-radius: 999px; background: var(--red); box-shadow: 0 0 24px currentColor; }
+.healthDot.healthy { background: var(--green); color: var(--green); }
+.healthDot.error { background: var(--red); color: var(--red); }
+.healthDot.not\ connected { background: var(--champagne-gold); color: var(--champagne-gold); }
+@media (max-width: 920px) { .threeColumn, .crudForm, .recordGrid, .healthGrid { grid-template-columns: 1fr; } .topNav { align-items: flex-start; flex-direction: column; } }

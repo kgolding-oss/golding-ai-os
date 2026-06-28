@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Golding AI Operating System",
-  description: "Sprint 1 executive dashboard shell for Golding AI OS.",
+  description: "Executive operating system shell for Golding AI OS.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
