@@ -1,62 +1,22 @@
 # Golding AI Operating System
 
-Sprint 2 turns the Sprint 1 dashboard shell into the production foundation for the Golding AI Operating System. The app uses Next.js App Router, TypeScript, Vercel-ready deployment, server-side Supabase authentication, protected routes, a reusable token-based theme, and SQL migrations for the operating database.
+Sprint 1 is a deployable Next.js executive dashboard shell for the Golding AI Operating System. It uses static mock data only and intentionally does **not** connect to OpenAI, Gmail, Google Drive, Supabase, Twilio, or any other paid/external integration.
 
-## Core modules
+## What is included
 
-- Dashboard
-- CEO
-- The Law Library
-- Golding Compound
-- YouPassGo
-- Relax With Me
-- Funding
-- CRM
-- Projects
-- Documents
-- Knowledge
-- AI Agents
-- Settings
-
-## Brand system
-
-The official Art Deco wallpaper is represented as reusable design tokens rather than repeated imagery. Tokens live in `theme/`:
-
-- `colors.ts`
-- `typography.ts`
-- `shadows.ts`
-- `spacing.ts`
-- `radius.ts`
-
-Components consume CSS custom properties generated from these tokens in `app/layout.tsx`.
-
-## Supabase environment variables
-
-Only public Supabase variables are required:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-public-anon-key"
-```
-
-Never add a Supabase service role key to this app or to Vercel frontend/server runtime variables.
-
-## Database setup
-
-Apply the SQL migration in `supabase/migrations/20260628000000_sprint_2_foundation.sql` to your Supabase project. It creates:
-
-- `profiles`
-- `organizations`
-- `businesses`
-- `projects`
-- `tasks`
-- `approvals`
-- `documents`
-- `knowledge`
-- `agent_memory`
-- `audit_logs`
-
-Every table has Row Level Security enabled. Policies restrict access to rows owned by the authenticated user.
+- Next.js App Router application at `/`
+- TypeScript project setup
+- Professional dark executive dashboard UI
+- CEO AI command panel mock interface
+- Business lanes for:
+  - The Law Library
+  - YouPassGo
+  - Golding Compound
+  - Relax With Me
+- Approval queue
+- Task list
+- Audit log
+- Mobile-friendly CSS
 
 ## Run locally
 
@@ -67,35 +27,36 @@ Every table has Row Level Security enabled. Policies restrict access to rows own
    npm install
    ```
 
-3. Add the Supabase public variables to `.env.local`.
-4. Start the development server:
+3. Start the development server:
 
    ```bash
    npm run dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000).
-6. Sign in with an existing Supabase Auth user.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Validate production readiness
+## Build for production
 
 ```bash
-npm run lint
 npm run build
 ```
 
-## Deploy to Vercel
+If the build succeeds, the app is ready to deploy to Vercel.
 
-1. Push this repository branch to GitHub.
-2. In Vercel, choose **Add New Project**.
-3. Import the `golding-ai-os` repository.
-4. Add only the two public Supabase variables listed above.
-5. Keep the default Next.js build settings.
-6. Click **Deploy**.
+## Beginner Vercel deployment
 
-## Security notes
+1. Create or sign in to a Vercel account at [vercel.com](https://vercel.com/).
+2. Push this repository to GitHub.
+3. In Vercel, choose **Add New Project**.
+4. Import the `golding-ai-os` repository.
+5. Keep the default framework settings. Vercel should detect Next.js automatically.
+6. Do not add environment variables for Sprint 1.
+7. Click **Deploy**.
+8. After deployment completes, open the production URL Vercel provides.
 
-- No service role key is used.
-- No Gmail, Google Drive, OpenAI, Twilio, or paid integrations are connected.
-- Authentication is server-side and protected pages redirect unauthenticated users to `/login`.
-- Dashboard data is read from Supabase REST endpoints under the signed-in user's JWT and RLS policies.
+## Sprint 1 safety notes
+
+- No secrets are required.
+- No `.env` file is needed.
+- No live AI calls are made.
+- All dashboard content is mock data stored in the app source.
