@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1000" viewBox="0 0 1440 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Golding OS green and gold theme screenshot preview</title>
+  <desc id="desc">Official green and gold design token palette preview.</desc>
+  <rect width="1440" height="1000" fill="#081616"/>
+  <text x="120" y="120" fill="#D9BF72" font-family="Arial" font-size="20" font-weight="800" letter-spacing="4">GOLDING OS BRAND SYSTEM</text>
+  <text x="120" y="205" fill="#F6F4EE" font-family="Arial" font-size="72" font-weight="900">Green &amp; Gold Theme</text>
+  <text x="120" y="270" fill="#F6F4EE" opacity="0.76" font-family="Arial" font-size="26">Reusable tokens extracted from the official Art Deco palette.</text>
+  <g font-family="Arial" font-weight="800">
+    <rect x="120" y="360" width="260" height="180" rx="28" fill="#103F35"/><text x="145" y="465" fill="#F6F4EE" font-size="24">Executive Emerald</text>
+    <rect x="420" y="360" width="260" height="180" rx="28" fill="#1C4F41"/><text x="445" y="465" fill="#F6F4EE" font-size="24">Heritage Green</text>
+    <rect x="720" y="360" width="260" height="180" rx="28" fill="#0C2E29"/><text x="745" y="465" fill="#F6F4EE" font-size="24">Forest Shadow</text>
+    <rect x="1020" y="360" width="260" height="180" rx="28" fill="#C7A24A"/><text x="1045" y="465" fill="#081616" font-size="24">Executive Gold</text>
+    <rect x="120" y="600" width="260" height="180" rx="28" fill="#B78A2D"/><text x="145" y="705" fill="#081616" font-size="24">Rich Gold</text>
+    <rect x="420" y="600" width="260" height="180" rx="28" fill="#D9BF72"/><text x="445" y="705" fill="#081616" font-size="24">Champagne Gold</text>
+    <rect x="720" y="600" width="260" height="180" rx="28" fill="#F6F4EE"/><text x="745" y="705" fill="#081616" font-size="24">Ivory</text>
+    <rect x="1020" y="600" width="260" height="180" rx="28" fill="#081616" stroke="#D9BF72" stroke-width="3"/><text x="1045" y="705" fill="#F6F4EE" font-size="24">Midnight</text>
+  </g>
+</svg>
