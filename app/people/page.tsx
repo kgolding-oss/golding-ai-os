@@ -17,7 +17,7 @@ export default async function PeoplePage() {
       <section className="recordGrid">
         {rows.map((row) => (
           <article className="panel recordCard" key={String(row.id)}>
-            <h2>{String(row.user_id ?? "Untitled")}</h2>
+            <h2>{String(row.profile_id ?? "Untitled")}</h2>
             <p>{String(row.status ?? "No detail")}</p>
           </article>
         ))}
