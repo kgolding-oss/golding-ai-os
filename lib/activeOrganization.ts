@@ -14,7 +14,7 @@ export type ActiveOrganization = {
 export type OrganizationMembership = {
   id: string;
   organization_id: string;
-  user_id?: string;
+  profile_id: string;
   status?: string | null;
   organizations?: ActiveOrganization | null;
 };
@@ -26,7 +26,7 @@ function encode(value: string) {
 }
 
 export async function listUserOrganizations(token: string) {
-  const query = "?select=id,organization_id,user_id,status,organizations(id,name,slug,status,industry)&status=eq.active&order=created_at.asc";
+  const query = "?select=id,organization_id,profile_id,status,organizations(id,name,slug,status,industry)&status=eq.active&order=created_at.asc";
   return getRows<OrganizationMembership>("organization_memberships", token, query);
 }
 
