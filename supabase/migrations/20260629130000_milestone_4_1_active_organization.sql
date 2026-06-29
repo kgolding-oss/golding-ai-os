@@ -24,7 +24,7 @@ returns boolean language sql security definer set search_path = public as $$
     from public.user_roles ur
     join public.roles r on r.id = ur.role_id
     where ur.profile_id = profile_uuid
-      and coalesce(ur.status, 'active') = 'active'
+      and ur.organization_id is null
       and r.name = 'Platform Super Admin'
   );
 $$;
