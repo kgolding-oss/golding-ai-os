@@ -11,7 +11,7 @@ export const roles = [
 
 export type Role = (typeof roles)[number];
 
-export const protectedRoutes = ["/dashboard", "/organizations", "/agents", "/tasks", "/approvals", "/system-health"];
+export const protectedRoutes = ["/dashboard", "/organizations", "/agents", "/tasks", "/approvals", "/system-health", "/people", "/invitations"];
 
 export const permissionMap: Record<Role, string[]> = {
   "Super Admin": ["*"] ,
