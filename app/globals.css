@@ -195,3 +195,13 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .healthDot.error { background: var(--red); color: var(--red); }
 .healthDot.not\ connected { background: var(--champagne-gold); color: var(--champagne-gold); }
 @media (max-width: 920px) { .threeColumn, .crudForm, .recordGrid, .healthGrid { grid-template-columns: 1fr; } .topNav { align-items: flex-start; flex-direction: column; } }
+.dashboardHero { margin-bottom: 18px; }
+.dashboardWidget { padding: 24px; }
+.dashboardWidget .promptBox { margin-bottom: 16px; }
+.executiveBriefList { margin-top: 16px; }
+.healthMiniGrid { display: grid; gap: 12px; }
+.healthMini { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
+.healthMini:last-child { border-bottom: 0; padding-bottom: 0; }
+.healthMini span:not(.healthDot) { display: block; color: var(--muted); font-size: .88rem; }
+.dashboardOrgGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 920px) { .dashboardOrgGrid { grid-template-columns: 1fr; } }
