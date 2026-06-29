@@ -205,3 +205,8 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .healthMini span:not(.healthDot) { display: block; color: var(--muted); font-size: .88rem; }
 .dashboardOrgGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 920px) { .dashboardOrgGrid { grid-template-columns: 1fr; } }
+.orgSwitcher { display: flex; align-items: flex-end; gap: 8px; }
+.orgSwitcher label, .crudForm select { display: grid; gap: 6px; color: var(--champagne-gold); font-size: .78rem; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+.orgSwitcher select, .crudForm select { border: 1px solid var(--line); border-radius: 14px; background: rgba(246,244,238,.08); color: var(--text); padding: 11px 13px; }
+.emptyPanel { padding: 28px; color: var(--muted); }
+.recordCard small { color: var(--muted); overflow-wrap: anywhere; }
