@@ -1,6 +1,7 @@
 import type { DashboardData } from "../dashboard/queries";
 import { buildAttentionQueue, buildRecommendations, getPendingApprovals, getUnhealthyAgents, isTaskOpen } from "../dashboard/intelligence";
 import type { AgentCommand, AgentRunContext, AgentRunResult, StructuredAgentOutput } from "../types/agent";
+import { knowledgeRegistry } from "../knowledge/registry";
 import { evaluateReleaseHealth } from "./release-health";
 
 export type CommandAgentInput = { command: string };
@@ -66,6 +67,9 @@ export function createCommandRegistry() {
     }})
     .register({ id: "workforce", label: "Review AI workforce", description: "Review agent health.", category: "agents", permissions: ["agents:read"], aliases: ["ai workforce", "agents", "agent health"], handler: (context) => {
       const agents = data(context).agents; const unhealthy = getUnhealthyAgents(agents); return output("AI workforce", `${agents.length} agents registered; ${unhealthy.length} need health review.`, [{ title: "Agents", items: agents.map((agent) => `${agent.name}: ${agent.health ?? agent.status ?? "unknown"}`) }], unhealthy.length ? ["Inspect unhealthy agents before assigning automated workflows."] : ["AI workforce health is clear."], { matched: true });
+    }})
+    .register({ id: "knowledge-sources", label: "List registered providers", description: "Show available knowledge sources and provider status.", category: "knowledge", permissions: ["knowledge:read"], aliases: ["show available knowledge sources", "available knowledge sources", "list registered providers", "registered providers", "knowledge sources"], handler: () => {
+      const providers = knowledgeRegistry.listProviders(); return output("Knowledge sources", `${providers.length} knowledge providers are registered.`, [{ title: "Registered providers", items: providers.map((provider) => `${provider.name}: ${provider.status}; ${provider.indexedDocumentCount} indexed documents; last sync ${provider.lastSyncAt ?? "not synced"}`) }], ["Connect provider integrations in a future milestone before indexing production data."], { matched: true, providers });
     }})
     .register({ id: "brief", label: "Prepare executive brief", description: "Prepare release and operating summary.", category: "executive", permissions: ["dashboard:read", "release:read"], aliases: ["executive brief", "brief", "prepare brief"], handler: (context) => {
       const d = data(context); const release = evaluateReleaseHealth({ lintPassed: true, typecheckPassed: true, buildPassed: true, criticalBlockers: buildAttentionQueue(d).filter((item) => item.severity === "critical").length, openApprovals: getPendingApprovals(d.approvals).length }); return output("Executive brief", `Release health is ${release.status} with score ${release.score}.`, [{ title: "Release health", items: release.reasons }, { title: "Operating snapshot", items: [`${d.tasks.length} tasks`, `${d.approvals.length} approvals`, `${d.agents.length} agents`] }], release.status === "ready" ? ["Ready for browser preview."] : ["Resolve release health risks before preview."], { matched: true, release });
