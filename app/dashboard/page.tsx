@@ -14,6 +14,7 @@ import { currentPath, requireActiveOrganization } from "../../lib/activeOrganiza
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
 import { getDashboardData } from "../../lib/dashboard/queries";
+import { commandAgent } from "../../lib/agents/command-agent";
 
 export default async function DashboardPage() {
   const { session, activeOrganization, memberships } = await requireActiveOrganization();
@@ -23,12 +24,13 @@ export default async function DashboardPage() {
   const pendingApprovals = data.approvals.filter((approval) => approval.status === "pending").length;
   const attentionItems = buildAttentionQueue(data);
   const recommendations = buildRecommendations({ ...data, organization: activeOrganizationRecord, membershipCount: data.memberships.length });
+  const commandAgentOutput = commandAgent.run({ input: data, command: "Prepare executive brief" }).output;
 
   return (
     <main className="shell executiveShell">
       <Navigation activeOrganization={activeOrganization} memberships={memberships} returnTo={currentPath()} />
       <DashboardHeader organizationCount={data.organizations.length} pendingApprovals={pendingApprovals} />
-      <CommandBar />
+      <CommandBar data={data} initialOutput={commandAgentOutput} />
       <MetricsGrid metrics={metrics} />
       <section className="grid twoColumn">
         <ExecutiveBrief organization={activeOrganizationRecord} tasks={data.tasks} approvals={data.approvals} agents={data.agents} health={data.health} projects={data.projects} activity={data.activity} auditLogs={data.auditLogs} membershipCount={data.memberships.length} />
