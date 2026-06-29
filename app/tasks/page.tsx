@@ -1,4 +1,54 @@
 import { revalidatePath } from "next/cache";
-import { formBool, formValue, getRows, supabaseRequest } from "../../lib/supabase/data";
-import { requireSession } from "../../lib/supabase/server";
-export default async function TasksPage(){const session=requireSession(); async function createTask(fd:FormData){"use server";const s=requireSession();await supabaseRequest("tasks",{token:s.access_token,method:"POST",body:{title:formValue(fd,"title"),description:formValue(fd,"description"),priority:formValue(fd,"priority")??"medium",status:formValue(fd,"status")??"todo",organization_id:formValue(fd,"organization_id"),project_id:formValue(fd,"project_id"),assigned_user_id:formValue(fd,"assigned_user_id"),assigned_agent_id:formValue(fd,"assigned_agent_id"),due_at:formValue(fd,"due_at"),dependencies:(formValue(fd,"dependencies")??"").split(",").map(x=>x.trim()).filter(Boolean),approval_required:formBool(fd,"approval_required"),completion_date:formValue(fd,"completion_date")}});revalidatePath("/tasks");} const tasks=await getRows<Record<string,any>>("tasks",session.access_token,"?select=*&order=due_at.asc");return <main className="shell"><section className="pageHeader panel"><p className="eyebrow">Task Engine</p><h1>Tasks</h1></section><form action={createTask} className="panel crudForm">{["title","description","priority","status","organization_id","project_id","assigned_user_id","assigned_agent_id","due_at","dependencies","completion_date"].map(f=><label key={f}>{f.replaceAll("_"," ")}<input name={f}/></label>)}<label className="check"><input type="checkbox" name="approval_required"/> Approval required</label><button className="button primary">Create task</button></form><section className="recordGrid">{tasks.map(t=><article className="panel recordCard" key={t.id}><h2>{t.title}</h2><p>{t.priority} · {t.status} · due {t.due_at ?? "unscheduled"}</p></article>)}</section></main>}
+import { PageShell } from "../../components/PageShell";
+import { requireActiveOrganization } from "../../lib/activeOrganization";
+import { formValue, getRows, supabaseRequest } from "../../lib/supabase/data";
+
+type Row = Record<string, string | number | boolean | null>;
+
+export default async function TasksPage() {
+  const { session, activeOrganization, memberships } = await requireActiveOrganization();
+  async function createRecord(formData: FormData) {
+    "use server";
+    const { session: serverSession, activeOrganization: serverOrganization } = await requireActiveOrganization();
+    if (!serverOrganization) return;
+    await supabaseRequest("tasks", { token: serverSession.access_token, method: "POST", body: { title: formValue(formData, "title"), description: formValue(formData, "description"), organization_id: serverOrganization.id, status: formValue(formData, "status") ?? "todo", priority: formValue(formData, "priority") ?? "medium" } });
+    revalidatePath("/tasks");
+  }
+
+  const rows = activeOrganization
+    ? await getRows<Row>("tasks", session.access_token, `?select=*&organization_id=eq.${encodeURIComponent(activeOrganization.id)}&order=created_at.desc`)
+    : [];
+
+  return (
+    <PageShell title="Tasks" kicker="Task engine" activeOrganization={activeOrganization} memberships={memberships}>
+      {!activeOrganization ? <EmptyState /> : null}
+      <CrudForm action={createRecord} fields={["title", "description", "priority", "status"]} />
+      <section className="recordGrid">
+        {rows.map((row) => (
+          <article className="panel recordCard" key={String(row.id)}>
+            <h2>{String(row.title ?? "Untitled")}</h2>
+            <p>{String(row.status ?? "No detail")}</p>
+          </article>
+        ))}
+      </section>
+    </PageShell>
+  );
+}
+
+function EmptyState() {
+  return <section className="panel"><p>No active organization is available for this account.</p></section>;
+}
+
+function CrudForm({ action, fields }: { action: (formData: FormData) => Promise<void>; fields: string[] }) {
+  return (
+    <form action={action} className="panel crudForm">
+      {fields.map((field) => (
+        <label key={field}>
+          {field.replaceAll("_", " ")}
+          <input name={field} />
+        </label>
+      ))}
+      <button className="button primary" type="submit">Create record</button>
+    </form>
+  );
+}

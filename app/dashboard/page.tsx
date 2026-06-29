@@ -2,23 +2,23 @@ import { DashboardHeader } from "../../components/dashboard/DashboardHeader";
 import { ExecutiveBrief } from "../../components/dashboard/ExecutiveBrief";
 import { MetricsGrid } from "../../components/dashboard/MetricsGrid";
 import { Navigation } from "../../components/dashboard/Navigation";
+import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
 import { OrganizationsWidget } from "../../components/dashboard/OrganizationsWidget";
 import { PriorityTasks } from "../../components/dashboard/PriorityTasks";
 import { RecentActivity } from "../../components/dashboard/RecentActivity";
 import { SystemHealth } from "../../components/dashboard/SystemHealth";
 import { buildMetrics } from "../../lib/dashboard/metrics";
 import { getDashboardData } from "../../lib/dashboard/queries";
-import { requireSession } from "../../lib/supabase/server";
 
 export default async function DashboardPage() {
-  const session = requireSession();
-  const data = await getDashboardData(session.access_token);
+  const { session, activeOrganization, memberships } = await requireActiveOrganization();
+  const data = await getDashboardData(session.access_token, activeOrganization?.id);
   const metrics = buildMetrics(data);
   const pendingApprovals = data.approvals.filter((approval) => approval.status === "pending").length;
 
   return (
     <main className="shell executiveShell">
-      <Navigation />
+      <Navigation activeOrganization={activeOrganization} memberships={memberships} returnTo={currentPath()} />
       <DashboardHeader organizationCount={data.organizations.length} pendingApprovals={pendingApprovals} />
       <MetricsGrid metrics={metrics} />
       <section className="grid twoColumn">

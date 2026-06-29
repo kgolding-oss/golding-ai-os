@@ -1,4 +1,54 @@
 import { revalidatePath } from "next/cache";
+import { PageShell } from "../../components/PageShell";
+import { requireActiveOrganization } from "../../lib/activeOrganization";
 import { formValue, getRows, supabaseRequest } from "../../lib/supabase/data";
-import { requireSession } from "../../lib/supabase/server";
-export default async function ApprovalsPage(){const session=requireSession(); async function createApproval(fd:FormData){"use server";const s=requireSession();await supabaseRequest("approvals",{token:s.access_token,method:"POST",body:{title:formValue(fd,"title"),task_id:formValue(fd,"task_id"),risk_score:Number(formValue(fd,"risk_score")??0),requested_by:formValue(fd,"requested_by"),reason:formValue(fd,"reason"),status:formValue(fd,"status")??"pending"}});revalidatePath("/approvals");} async function decide(fd:FormData){"use server";const s=requireSession();const id=formValue(fd,"id");const status=formValue(fd,"status");if(id&&status) await supabaseRequest("approvals",{token:s.access_token,method:"PATCH",query:`?id=eq.${id}`,body:{status,decision_notes:formValue(fd,"decision_notes"),decided_at:new Date().toISOString()}});revalidatePath("/approvals");} const approvals=await getRows<Record<string,any>>("approvals",session.access_token,"?select=*&order=created_at.desc");return <main className="shell"><section className="pageHeader panel"><p className="eyebrow">Approval Center</p><h1>Approve, reject, or delegate</h1></section><form action={createApproval} className="panel crudForm">{["title","task_id","risk_score","requested_by","reason","status"].map(f=><label key={f}>{f.replaceAll("_"," ")}<input name={f}/></label>)}<button className="button primary">Request approval</button></form><section className="recordGrid">{approvals.map(a=><article className="panel recordCard" key={a.id}><h2>{a.title}</h2><p>Risk {a.risk_score ?? 0} · {a.status} · {a.reason ?? "No reason"}</p><form action={decide} className="decisionBar"><input type="hidden" name="id" value={a.id}/><input name="decision_notes" placeholder="Decision notes"/><button name="status" value="approved">Approve</button><button name="status" value="rejected">Reject</button><button name="status" value="delegated">Delegate</button></form></article>)}</section></main>}
+
+type Row = Record<string, string | number | boolean | null>;
+
+export default async function ApprovalsPage() {
+  const { session, activeOrganization, memberships } = await requireActiveOrganization();
+  async function createRecord(formData: FormData) {
+    "use server";
+    const { session: serverSession, activeOrganization: serverOrganization } = await requireActiveOrganization();
+    if (!serverOrganization) return;
+    await supabaseRequest("approvals", { token: serverSession.access_token, method: "POST", body: { title: formValue(formData, "title"), organization_id: serverOrganization.id, risk_score: Number(formValue(formData, "risk_score") ?? 0), reason: formValue(formData, "reason"), status: formValue(formData, "status") ?? "pending" } });
+    revalidatePath("/approvals");
+  }
+
+  const rows = activeOrganization
+    ? await getRows<Row>("approvals", session.access_token, `?select=*&organization_id=eq.${encodeURIComponent(activeOrganization.id)}&order=created_at.desc`)
+    : [];
+
+  return (
+    <PageShell title="Approvals" kicker="Approval center" activeOrganization={activeOrganization} memberships={memberships}>
+      {!activeOrganization ? <EmptyState /> : null}
+      <CrudForm action={createRecord} fields={["title", "risk_score", "reason", "status"]} />
+      <section className="recordGrid">
+        {rows.map((row) => (
+          <article className="panel recordCard" key={String(row.id)}>
+            <h2>{String(row.title ?? "Untitled")}</h2>
+            <p>{String(row.status ?? "No detail")}</p>
+          </article>
+        ))}
+      </section>
+    </PageShell>
+  );
+}
+
+function EmptyState() {
+  return <section className="panel"><p>No active organization is available for this account.</p></section>;
+}
+
+function CrudForm({ action, fields }: { action: (formData: FormData) => Promise<void>; fields: string[] }) {
+  return (
+    <form action={action} className="panel crudForm">
+      {fields.map((field) => (
+        <label key={field}>
+          {field.replaceAll("_", " ")}
+          <input name={field} />
+        </label>
+      ))}
+      <button className="button primary" type="submit">Create record</button>
+    </form>
+  );
+}

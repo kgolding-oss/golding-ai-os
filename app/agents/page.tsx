@@ -1,4 +1,54 @@
 import { revalidatePath } from "next/cache";
-import { formBool, formValue, getRows, supabaseRequest } from "../../lib/supabase/data";
-import { requireSession } from "../../lib/supabase/server";
-export default async function AgentsPage(){const session=requireSession(); async function createAgent(fd:FormData){"use server";const s=requireSession();await supabaseRequest("agent_registry",{token:s.access_token,method:"POST",body:{name:formValue(fd,"name"),role:formValue(fd,"role"),organization_id:formValue(fd,"organization_id"),description:formValue(fd,"description"),prompt:formValue(fd,"prompt"),tools:(formValue(fd,"tools")??"").split(",").map(x=>x.trim()).filter(Boolean),permissions:(formValue(fd,"permissions")??"").split(",").map(x=>x.trim()).filter(Boolean),approval_required:formBool(fd,"approval_required"),memory_enabled:formBool(fd,"memory_enabled"),status:formValue(fd,"status")??"draft",version:formValue(fd,"version")??"1.0.0",health:formValue(fd,"health")??"Healthy"}});revalidatePath("/agents");} const agents=await getRows<Record<string,any>>("agent_registry",session.access_token,"?select=*&order=name");return <main className="shell"><section className="pageHeader panel"><p className="eyebrow">AI Workforce Registry</p><h1>AI Agents</h1></section><form action={createAgent} className="panel crudForm">{["name","role","organization_id","description","prompt","tools","permissions","status","version","health"].map(f=><label key={f}>{f.replaceAll("_"," ")}<input name={f}/></label>)}<label className="check"><input type="checkbox" name="approval_required"/> Approval required</label><label className="check"><input type="checkbox" name="memory_enabled"/> Memory enabled</label><button className="button primary">Create agent</button></form><section className="recordGrid">{agents.map(a=><article className="panel recordCard" key={a.id}><h2>{a.name}</h2><p>{a.role} · {a.status} · {a.health} · v{a.version}</p></article>)}</section></main>}
+import { PageShell } from "../../components/PageShell";
+import { requireActiveOrganization } from "../../lib/activeOrganization";
+import { formValue, getRows, supabaseRequest } from "../../lib/supabase/data";
+
+type Row = Record<string, string | number | boolean | null>;
+
+export default async function AgentsPage() {
+  const { session, activeOrganization, memberships } = await requireActiveOrganization();
+  async function createRecord(formData: FormData) {
+    "use server";
+    const { session: serverSession, activeOrganization: serverOrganization } = await requireActiveOrganization();
+    if (!serverOrganization) return;
+    await supabaseRequest("agent_registry", { token: serverSession.access_token, method: "POST", body: { name: formValue(formData, "name"), role: formValue(formData, "role"), organization_id: serverOrganization.id, status: formValue(formData, "status") ?? "draft" } });
+    revalidatePath("/agents");
+  }
+
+  const rows = activeOrganization
+    ? await getRows<Row>("agent_registry", session.access_token, `?select=*&organization_id=eq.${encodeURIComponent(activeOrganization.id)}&order=created_at.desc`)
+    : [];
+
+  return (
+    <PageShell title="AI Agents" kicker="AI workforce registry" activeOrganization={activeOrganization} memberships={memberships}>
+      {!activeOrganization ? <EmptyState /> : null}
+      <CrudForm action={createRecord} fields={["name", "role", "status"]} />
+      <section className="recordGrid">
+        {rows.map((row) => (
+          <article className="panel recordCard" key={String(row.id)}>
+            <h2>{String(row.name ?? "Untitled")}</h2>
+            <p>{String(row.status ?? "No detail")}</p>
+          </article>
+        ))}
+      </section>
+    </PageShell>
+  );
+}
+
+function EmptyState() {
+  return <section className="panel"><p>No active organization is available for this account.</p></section>;
+}
+
+function CrudForm({ action, fields }: { action: (formData: FormData) => Promise<void>; fields: string[] }) {
+  return (
+    <form action={action} className="panel crudForm">
+      {fields.map((field) => (
+        <label key={field}>
+          {field.replaceAll("_", " ")}
+          <input name={field} />
+        </label>
+      ))}
+      <button className="button primary" type="submit">Create record</button>
+    </form>
+  );
+}
