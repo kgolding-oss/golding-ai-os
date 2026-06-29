@@ -72,32 +72,32 @@ alter table public.role_permissions enable row level security;
 alter table public.approval_history enable row level security;
 
 drop policy if exists "milestone 3 authenticated organizations" on public.organizations;
-create policy "milestone 3 authenticated organizations" on public.organizations for all to authenticated using (true) with check (true);
+create policy "milestone 3 authenticated organizations" on public.organizations for all to authenticated using (public.is_org_member(id)) with check (public.can_manage_org(id));
 drop policy if exists "milestone 3 authenticated projects" on public.projects;
-create policy "milestone 3 authenticated projects" on public.projects for all to authenticated using (true) with check (true);
+create policy "milestone 3 authenticated projects" on public.projects for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
 drop policy if exists "milestone 3 authenticated tasks" on public.tasks;
-create policy "milestone 3 authenticated tasks" on public.tasks for all to authenticated using (true) with check (true);
+create policy "milestone 3 authenticated tasks" on public.tasks for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
 drop policy if exists "milestone 3 authenticated approvals" on public.approvals;
-create policy "milestone 3 authenticated approvals" on public.approvals for all to authenticated using (true) with check (true);
+create policy "milestone 3 authenticated approvals" on public.approvals for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
 
 drop policy if exists "authenticated manage agent_registry" on public.agent_registry;
-create policy "authenticated manage agent_registry" on public.agent_registry for all to authenticated using (true) with check (true);
+create policy "authenticated manage agent_registry" on public.agent_registry for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
 drop policy if exists "authenticated manage organization_users" on public.organization_users;
-create policy "authenticated manage organization_users" on public.organization_users for all to authenticated using (true) with check (true);
+create policy "authenticated manage organization_users" on public.organization_users for all to authenticated using (public.is_org_member(organization_id)) with check (public.can_manage_org(organization_id));
 drop policy if exists "authenticated manage organization_branding" on public.organization_branding;
-create policy "authenticated manage organization_branding" on public.organization_branding for all to authenticated using (true) with check (true);
+create policy "authenticated manage organization_branding" on public.organization_branding for all to authenticated using (public.is_org_member(organization_id)) with check (public.can_manage_org(organization_id));
 drop policy if exists "authenticated manage notifications" on public.notifications;
-create policy "authenticated manage notifications" on public.notifications for all to authenticated using (true) with check (true);
+create policy "authenticated manage notifications" on public.notifications for all to authenticated using (public.is_org_member(organization_id)) with check (public.is_org_member(organization_id));
 drop policy if exists "authenticated manage agent_activity" on public.agent_activity;
-create policy "authenticated manage agent_activity" on public.agent_activity for all to authenticated using (true) with check (true);
+create policy "authenticated manage agent_activity" on public.agent_activity for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
 drop policy if exists "authenticated manage system_health" on public.system_health;
-create policy "authenticated manage system_health" on public.system_health for all to authenticated using (true) with check (true);
+create policy "authenticated manage system_health" on public.system_health for select to authenticated using (auth.uid() is not null);
 drop policy if exists "authenticated manage permission_groups" on public.permission_groups;
-create policy "authenticated manage permission_groups" on public.permission_groups for all to authenticated using (true) with check (true);
+create policy "authenticated manage permission_groups" on public.permission_groups for select to authenticated using (auth.uid() is not null);
 drop policy if exists "authenticated manage role_permissions" on public.role_permissions;
-create policy "authenticated manage role_permissions" on public.role_permissions for all to authenticated using (true) with check (true);
+create policy "authenticated manage role_permissions" on public.role_permissions for select to authenticated using (auth.uid() is not null);
 drop policy if exists "authenticated manage approval_history" on public.approval_history;
-create policy "authenticated manage approval_history" on public.approval_history for all to authenticated using (true) with check (true);
+create policy "authenticated manage approval_history" on public.approval_history for select to authenticated using (exists (select 1 from public.approvals a where a.id = approval_id and public.is_org_member(a.organization_id)));
 
 insert into public.permission_groups (name, description) values ('Executive Core','Milestone 3.1 dashboard, registry, task, approval, and health permissions') on conflict (name) do nothing;
 insert into public.role_permissions (role, permission_group_id, permission)
@@ -108,3 +108,155 @@ where pg.name='Executive Core' on conflict (role, permission) do nothing;
 insert into public.agent_activity (activity_type, summary) values
 ('brief.created','Executive brief generated from live operating records.'),('registry.seeded','Business and AI workforce registries seeded.'),('health.checked','System health placeholders loaded for deferred integrations.')
 on conflict do nothing;
+
+-- Milestone 4.1: Active organization context, identity RLS hardening, and org-scoped agents.
+create table if not exists public.organization_memberships (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  role text not null default 'Viewer',
+  status text not null default 'active',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (organization_id, profile_id)
+);
+
+create table if not exists public.organization_invitations (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  email text not null,
+  role text not null default 'Viewer',
+  invited_by uuid references public.profiles(id) on delete set null,
+  expires_at timestamptz not null default (now() + interval '7 days'),
+  accepted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.user_roles (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid references public.organizations(id) on delete cascade,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  role text not null default 'Viewer',
+  assigned_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  unique (organization_id, profile_id, role)
+);
+
+create table if not exists public.user_preferences (
+  profile_id uuid primary key references public.profiles(id) on delete cascade,
+  active_organization_id uuid references public.organizations(id) on delete set null,
+  theme text not null default 'executive',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_preferences add column if not exists active_organization_id uuid references public.organizations(id) on delete set null;
+create index if not exists user_preferences_active_organization_id_idx on public.user_preferences(active_organization_id);
+create index if not exists organization_memberships_profile_id_idx on public.organization_memberships(profile_id);
+create index if not exists organization_memberships_organization_id_idx on public.organization_memberships(organization_id);
+create index if not exists organization_invitations_organization_id_idx on public.organization_invitations(organization_id);
+create index if not exists user_roles_profile_organization_idx on public.user_roles(profile_id, organization_id);
+
+insert into public.organization_memberships (organization_id, profile_id, role)
+select id, owner_id, 'Organization Admin' from public.organizations where owner_id is not null
+on conflict (organization_id, profile_id) do nothing;
+
+insert into public.organization_memberships (organization_id, profile_id, role, status)
+select organization_id, user_id, role, status from public.organization_users
+where organization_id is not null and user_id is not null
+on conflict (organization_id, profile_id) do update set role = excluded.role, status = excluded.status;
+
+update public.agent_registry set organization_id = (select id from public.organizations order by created_at asc limit 1) where organization_id is null;
+alter table public.agent_registry alter column organization_id set not null;
+update public.agent_activity set organization_id = (select id from public.organizations order by created_at asc limit 1) where organization_id is null;
+alter table public.agent_activity alter column organization_id set not null;
+
+create or replace function public.is_platform_super_admin(profile_uuid uuid default auth.uid())
+returns boolean language sql security definer set search_path = public as $$
+  select exists (select 1 from public.user_roles where profile_id = profile_uuid and role = 'Super Admin' and organization_id is null);
+$$;
+
+create or replace function public.is_org_member(target_organization_id uuid, profile_uuid uuid default auth.uid())
+returns boolean language sql security definer set search_path = public as $$
+  select public.is_platform_super_admin(profile_uuid) or exists (
+    select 1 from public.organization_memberships
+    where organization_id = target_organization_id and profile_id = profile_uuid and status = 'active'
+  );
+$$;
+
+create or replace function public.can_manage_org(target_organization_id uuid, profile_uuid uuid default auth.uid())
+returns boolean language sql security definer set search_path = public as $$
+  select public.is_platform_super_admin(profile_uuid) or exists (
+    select 1 from public.organization_memberships
+    where organization_id = target_organization_id and profile_id = profile_uuid and status = 'active'
+      and role in ('Organization Admin','Executive Director')
+  );
+$$;
+
+create or replace function public.get_active_organization(profile_uuid uuid)
+returns public.organizations language plpgsql security definer set search_path = public as $$
+declare org public.organizations%rowtype;
+declare chosen uuid;
+begin
+  if profile_uuid <> auth.uid() and not public.is_platform_super_admin(auth.uid()) then raise exception 'unauthorized'; end if;
+  select active_organization_id into chosen from public.user_preferences where profile_id = profile_uuid;
+  if chosen is null or not public.is_org_member(chosen, profile_uuid) then
+    select organization_id into chosen from public.organization_memberships where profile_id = profile_uuid and status = 'active' order by created_at asc limit 1;
+    insert into public.user_preferences (profile_id, active_organization_id) values (profile_uuid, chosen)
+    on conflict (profile_id) do update set active_organization_id = excluded.active_organization_id, updated_at = now();
+  end if;
+  select * into org from public.organizations where id = chosen;
+  return org;
+end; $$;
+
+create or replace function public.switch_active_organization(profile_uuid uuid, organization_uuid uuid)
+returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if profile_uuid <> auth.uid() and not public.is_platform_super_admin(auth.uid()) then
+    return jsonb_build_object('success', false, 'error', 'unauthorized');
+  end if;
+  if not public.is_org_member(organization_uuid, profile_uuid) then
+    return jsonb_build_object('success', false, 'error', 'membership_required');
+  end if;
+  insert into public.user_preferences (profile_id, active_organization_id) values (profile_uuid, organization_uuid)
+  on conflict (profile_id) do update set active_organization_id = excluded.active_organization_id, updated_at = now();
+  insert into public.audit_logs (organization_id, actor_id, action, entity_table, entity_id)
+  values (organization_uuid, profile_uuid, 'organization.switched', 'organizations', organization_uuid);
+  return jsonb_build_object('success', true, 'active_organization_id', organization_uuid);
+end; $$;
+
+create or replace function public.validate_email(email text) returns boolean language sql immutable as $$ select email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$'; $$;
+create or replace function public.validate_invitation_expiration(expires_at timestamptz) returns boolean language sql stable as $$ select expires_at > now(); $$;
+create or replace function public.validate_uuid(value uuid) returns boolean language sql immutable as $$ select value is not null; $$;
+
+alter table public.organization_memberships enable row level security;
+alter table public.organization_invitations enable row level security;
+alter table public.user_roles enable row level security;
+alter table public.user_preferences enable row level security;
+
+drop policy if exists "milestone 3 authenticated organizations" on public.organizations;
+drop policy if exists "authenticated manage organization_users" on public.organization_users;
+drop policy if exists "authenticated manage agent_registry" on public.agent_registry;
+drop policy if exists "authenticated manage agent_activity" on public.agent_activity;
+drop policy if exists "authenticated manage notifications" on public.notifications;
+drop policy if exists "authenticated manage permission_groups" on public.permission_groups;
+drop policy if exists "authenticated manage role_permissions" on public.role_permissions;
+drop policy if exists "milestone 3 authenticated projects" on public.projects;
+drop policy if exists "milestone 3 authenticated tasks" on public.tasks;
+drop policy if exists "milestone 3 authenticated approvals" on public.approvals;
+
+create policy "organizations are membership scoped" on public.organizations for select to authenticated using (public.is_org_member(id));
+create policy "organization admins manage organizations" on public.organizations for all to authenticated using (public.can_manage_org(id)) with check (public.can_manage_org(id));
+create policy "memberships visible to members" on public.organization_memberships for select to authenticated using (public.is_org_member(organization_id));
+create policy "admins manage memberships" on public.organization_memberships for all to authenticated using (public.can_manage_org(organization_id)) with check (public.can_manage_org(organization_id));
+create policy "invitations visible to members" on public.organization_invitations for select to authenticated using (public.is_org_member(organization_id));
+create policy "admins manage invitations" on public.organization_invitations for all to authenticated using (public.can_manage_org(organization_id) and public.validate_email(email) and public.validate_invitation_expiration(expires_at)) with check (public.can_manage_org(organization_id) and public.validate_email(email) and public.validate_invitation_expiration(expires_at));
+create policy "user roles visible to members" on public.user_roles for select to authenticated using (organization_id is null and public.is_platform_super_admin(auth.uid()) or public.is_org_member(organization_id));
+create policy "admins assign organization roles" on public.user_roles for all to authenticated using (public.can_manage_org(organization_id)) with check (public.can_manage_org(organization_id));
+create policy "users manage own preferences" on public.user_preferences for all to authenticated using (profile_id = auth.uid()) with check (profile_id = auth.uid() and (active_organization_id is null or public.is_org_member(active_organization_id)));
+
+create policy "projects are direct organization scoped" on public.projects for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
+create policy "tasks are direct organization scoped" on public.tasks for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
+create policy "approvals are direct organization scoped" on public.approvals for all to authenticated using (organization_id is not null and public.is_org_member(organization_id)) with check (organization_id is not null and public.is_org_member(organization_id));
+create policy "agents are organization scoped" on public.agent_registry for all to authenticated using (public.is_org_member(organization_id)) with check (public.is_org_member(organization_id));
+create policy "agent activity is organization scoped" on public.agent_activity for all to authenticated using (public.is_org_member(organization_id)) with check (public.is_org_member(organization_id));

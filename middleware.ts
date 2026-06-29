@@ -13,7 +13,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const response = NextResponse.next();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-current-path", request.nextUrl.pathname);
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("x-golding-rbac", "permission-middleware-enabled");
   return response;
 }
