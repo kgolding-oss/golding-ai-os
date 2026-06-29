@@ -1,7 +1,7 @@
 import type { Activity, Agent, Approval, AuditLog, Health, Organization, Project, Task } from "./queries";
+import type { AttentionItem, Recommendation } from "../types/agent";
 
-export type AttentionItem = { id: string; title: string; detail: string; severity: "critical" | "high" | "medium" | "low"; source: string };
-export type Recommendation = { id: string; title: string; rationale: string; action: string; severity: AttentionItem["severity"] };
+export type { AttentionItem, Recommendation } from "../types/agent";
 
 const closedTaskStatuses = new Set(["done", "completed", "cancelled", "archived"]);
 const unhealthyValues = new Set(["error", "failed", "unhealthy", "degraded", "offline"]);
