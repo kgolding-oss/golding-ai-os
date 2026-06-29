@@ -205,3 +205,25 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .healthMini span:not(.healthDot) { display: block; color: var(--muted); font-size: .88rem; }
 .dashboardOrgGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 920px) { .dashboardOrgGrid { grid-template-columns: 1fr; } }
+.commandBar { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.4fr) auto; gap: 16px; align-items: end; margin-bottom: 18px; padding: 22px; }
+.commandBar h2 { margin-bottom: 0; font-size: clamp(1.25rem, 2vw, 1.8rem); }
+.commandBar label { display: grid; gap: 8px; }
+.commandBar input { width: 100%; border: 1px solid rgba(217, 191, 114, 0.36); border-radius: 999px; background: rgba(246,244,238,.08); color: var(--text); padding: 15px 18px; font: inherit; }
+.commandBar input::placeholder { color: rgba(246, 244, 238, 0.66); }
+.commandBar button:disabled, .commandBar input:disabled { opacity: .72; cursor: not-allowed; }
+.briefGrid, .statusSummary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.briefStat, .statusSummary { border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.035); padding: 14px; }
+.briefStat strong, .statusSummary strong { display: block; color: var(--champagne-gold); font-size: 1.45rem; }
+.briefStat span, .statusSummary span { color: var(--muted); font-size: .82rem; }
+.attentionRow .pill.critical, .pill.critical { background: rgba(255, 157, 144, 0.18); color: var(--red) !important; }
+.attentionRow .pill.high { background: rgba(255, 139, 139, 0.16); color: var(--red) !important; }
+.attentionRow .pill.medium { background: rgba(216, 178, 94, 0.16); color: var(--gold) !important; }
+.attentionRow .pill.low { background: rgba(116, 215, 167, 0.16); color: var(--green) !important; }
+.compactList { margin-top: 16px; }
+.activityHint { margin: 14px 0 0; color: var(--champagne-gold); line-height: 1.5; }
+.recommendation { border: 1px solid var(--line); border-radius: 20px; padding: 16px; background: rgba(255,255,255,.035); }
+.recommendation h3 { margin: 12px 0 8px; }
+.recommendation p { color: var(--muted); line-height: 1.55; }
+.recommendation strong { color: var(--champagne-gold); }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (max-width: 920px) { .commandBar, .briefGrid, .statusSummary { grid-template-columns: 1fr; } }
