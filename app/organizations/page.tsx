@@ -1,13 +1,50 @@
 import { revalidatePath } from "next/cache";
-import { formValue, getRows, supabaseRequest } from "../../lib/supabase/data";
+import { EmptyState, PageHeader, PageShell } from "../../components/PageShell";
+import { getVisibleOrganizations, type Organization } from "../../lib/identity";
+import { formValue, supabaseRequest } from "../../lib/supabase/data";
 import { requireSession } from "../../lib/supabase/server";
 
 export default async function OrganizationsPage() {
   const session = requireSession();
-  async function createOrganization(formData: FormData) { "use server"; const s = requireSession(); await supabaseRequest("organizations", { token: s.access_token, method: "POST", body: { name: formValue(formData, "name"), logo_url: formValue(formData, "logo_url"), mission: formValue(formData, "mission"), description: formValue(formData, "description"), industry: formValue(formData, "industry"), status: formValue(formData, "status") ?? "active", primary_color: formValue(formData, "primary_color"), secondary_color: formValue(formData, "secondary_color"), website: formValue(formData, "website"), domain: formValue(formData, "domain"), executive: formValue(formData, "executive"), notes: formValue(formData, "notes") } }); revalidatePath("/organizations"); }
-  const organizations = await getRows<Record<string, any>>("organizations", session.access_token, "?select=*&order=name");
-  return <main className="shell"><Header title="Business Registry" kicker="Organizations CRUD" /><CrudForm action={createOrganization} fields={["name","logo_url","mission","description","industry","status","primary_color","secondary_color","website","domain","executive","notes"]} /><Cards rows={organizations} titleKey="name" detail={(o) => `${o.industry ?? "No industry"} · ${o.status ?? "active"} · ${o.executive ?? "No executive"}`} /></main>;
+  const organizations = await getVisibleOrganizations(session.access_token);
+
+  async function createOrganization(formData: FormData) {
+    "use server";
+    const currentSession = requireSession();
+    const name = formValue(formData, "name");
+    await supabaseRequest<Organization>("organizations", {
+      token: currentSession.access_token,
+      method: "POST",
+      body: {
+        name,
+        slug: (name ?? "organization").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+        mission: formValue(formData, "mission"),
+        description: formValue(formData, "description"),
+        industry: formValue(formData, "industry"),
+        status: formValue(formData, "status") ?? "active",
+      },
+    });
+    revalidatePath("/organizations");
+  }
+
+  return (
+    <PageShell organizations={organizations}>
+      <PageHeader title="Organizations" kicker="Identity Engine" description="Manage the organizations the current user can access through memberships or platform administration." />
+      <form action={createOrganization} className="panel crudForm">
+        {[
+          ["name", "Name"],
+          ["mission", "Mission"],
+          ["description", "Description"],
+          ["industry", "Industry"],
+          ["status", "Status"],
+        ].map(([name, label]) => (
+          <label key={name}>{label}<input name={name} required={name === "name"} /></label>
+        ))}
+        <button className="button primary" type="submit">Create organization</button>
+      </form>
+      {organizations.length === 0 ? <EmptyState title="No organizations yet" message="Create or join an organization to begin using the operating system." /> : (
+        <section className="recordGrid">{organizations.map((organization) => <article className="panel recordCard" key={organization.id}><p className="recordMeta">{organization.status ?? "active"}</p><h2>{organization.name}</h2><p>{organization.industry ?? "No industry set"} · {organization.executive ?? "No executive assigned"}</p></article>)}</section>
+      )}
+    </PageShell>
+  );
 }
-function Header({title,kicker}:{title:string;kicker:string}){return <section className="pageHeader panel"><p className="eyebrow">{kicker}</p><h1>{title}</h1></section>}
-function CrudForm({action,fields}:{action:(fd:FormData)=>Promise<void>;fields:string[]}){return <form action={action} className="panel crudForm">{fields.map(f=><label key={f}>{f.replaceAll("_"," ")}<input name={f}/></label>)}<button className="button primary" type="submit">Create record</button></form>}
-function Cards({rows,titleKey,detail}:{rows:Record<string,any>[];titleKey:string;detail:(r:Record<string,any>)=>string}){return <section className="recordGrid">{rows.map(r=><article className="panel recordCard" key={r.id}><h2>{r[titleKey]}</h2><p>{detail(r)}</p></article>)}</section>}
