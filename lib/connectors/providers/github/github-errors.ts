@@ -1,0 +1,2 @@
+export class GitHubConnectorError extends Error { constructor(public code: string, message: string, public status?: number) { super(message); this.name = "GitHubConnectorError"; } }
+export const sanitizeGitHubError = (error: unknown) => error instanceof GitHubConnectorError ? { code: error.code, message: error.message, status: error.status } : { code: "GITHUB_UNKNOWN", message: error instanceof Error ? error.message : String(error) };

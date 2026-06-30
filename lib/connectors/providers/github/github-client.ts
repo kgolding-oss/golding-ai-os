@@ -1,0 +1,5 @@
+import { githubAuthorizationHeader, resolveGitHubAuth } from "./github-auth";
+import { GitHubConnectorError } from "./github-errors";
+import { parseRateLimit } from "./github-rate-limit";
+export class GitHubClient { baseUrl = "https://api.github.com"; lastRateLimit = undefined as ReturnType<typeof parseRateLimit>; async request<T>(path: string, init: RequestInit = {}): Promise<T> { const auth = await githubAuthorizationHeader(resolveGitHubAuth()); if (!auth) throw new GitHubConnectorError("GITHUB_AUTH_REQUIRED", "GitHub authentication is not configured.", 401); const response = await fetch(`${this.baseUrl}${path}`, { ...init, headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", Authorization: auth, ...(init.headers ?? {}) } }); this.lastRateLimit = parseRateLimit(response.headers); if (!response.ok) throw new GitHubConnectorError("GITHUB_API_ERROR", `GitHub API request failed with ${response.status}.`, response.status); if (response.status === 204) return {} as T; return response.json() as Promise<T>; } }
+export const githubClient = new GitHubClient();

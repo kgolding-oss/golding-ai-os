@@ -1,0 +1,3 @@
+import type { GitHubRateLimit } from "./github-types";
+export function parseRateLimit(headers: Headers): GitHubRateLimit | undefined { const limit = Number(headers.get("x-ratelimit-limit") ?? 0); if (!limit) return undefined; return { limit, remaining: Number(headers.get("x-ratelimit-remaining") ?? 0), used: Number(headers.get("x-ratelimit-used") ?? 0), reset: new Date(Number(headers.get("x-ratelimit-reset") ?? 0) * 1000).toISOString(), resource: headers.get("x-ratelimit-resource") ?? "core" }; }
+export function utilization(rate?: GitHubRateLimit) { return rate && rate.limit ? Math.round(((rate.limit - rate.remaining) / rate.limit) * 100) / 100 : 0; }
