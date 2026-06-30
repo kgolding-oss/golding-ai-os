@@ -19,6 +19,7 @@ import { SystemHealth } from "../../components/dashboard/SystemHealth";
 import { DiagnosticsPanel } from "../../components/dashboard/DiagnosticsPanel";
 import { ExecutiveIntelligenceDashboard } from "../../components/intelligence/ExecutiveIntelligenceDashboard";
 import { AutonomousOperationsPanel } from "../../components/autonomy/AutonomousOperationsPanel";
+import { ChiefOfStaffPanel } from "../../components/chief-of-staff/ChiefOfStaffPanel";
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
@@ -33,6 +34,7 @@ import { aiRuntime } from "../../lib/runtime";
 import { connectorManager } from "../../lib/connectors";
 import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observability";
 import { executiveIntelligenceEngine } from "../../lib/intelligence";
+import { chiefOfStaffRuntime } from "../../lib/agents/chief-of-staff";
 import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recoveryEngine } from "../../lib/autonomy";
 import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary } from "../../lib/ai";
 import { mcpRegistry } from "../../lib/connectors/providers/mcp";
@@ -72,6 +74,7 @@ export default async function DashboardPage() {
   const mcpServers = mcpRegistry.list();
   const aiOperationsScore = Math.max(0, Math.min(100, 50 + aiModels.length * 10 + aiTools.length * 3 - aiTelemetry.sessions.failures * 10));
   const executiveSnapshot = executiveIntelligenceEngine.analyze({ organization: activeOrganizationRecord, dashboard: data, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory });
+  const chiefOfStaffSnapshot = await chiefOfStaffRuntime.synthesize({ organization: activeOrganizationRecord, dashboard: data, executiveIntelligence: executiveSnapshot, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory, autonomousPlans: autonomyEngine.listPlans(), pendingApprovals: approvalEngine.list() }, { token: session.access_token, organizationId: activeOrganizationRecord?.id, profileId: session.user?.id });
   const autonomousPlan = autonomyEngine.createExecutionPlan({ organization: activeOrganizationRecord ? { id: activeOrganizationRecord.id, name: activeOrganizationRecord.name } : null, executiveIntelligence: executiveSnapshot, workflows, runtimeTools, connectors, knowledgeHealth, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, operatingHistory, source: "dashboard" });
   if (!autonomousScheduler.list().some((schedule) => schedule.planId === autonomousPlan.id)) autonomousScheduler.schedule(autonomousPlan.id, autonomousPlan.organizationId, { type: "delayed", delayMs: 300000 });
 
@@ -100,6 +103,7 @@ export default async function DashboardPage() {
       <EnterpriseConnectorsPanel connectors={connectors} sessions={connectorSessions} diagnostics={connectorDiagnostics} />
       <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
       <ExecutiveIntelligenceDashboard snapshot={executiveSnapshot} />
+      <ChiefOfStaffPanel snapshot={chiefOfStaffSnapshot} />
       <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
