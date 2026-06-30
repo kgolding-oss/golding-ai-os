@@ -4,6 +4,7 @@ import { CommandBar } from "../../components/dashboard/CommandBar";
 import { DashboardHeader } from "../../components/dashboard/DashboardHeader";
 import { ExecutiveBrief } from "../../components/dashboard/ExecutiveBrief";
 import { MetricsGrid } from "../../components/dashboard/MetricsGrid";
+import { KnowledgeDashboard } from "../../components/knowledge/KnowledgeDashboard";
 import { Navigation } from "../../components/dashboard/Navigation";
 import { OrganizationsWidget } from "../../components/dashboard/OrganizationsWidget";
 import { PriorityTasks } from "../../components/dashboard/PriorityTasks";
@@ -14,6 +15,7 @@ import { currentPath, requireActiveOrganization } from "../../lib/activeOrganiza
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
 import { getDashboardData } from "../../lib/dashboard/queries";
+import { knowledgeRegistry } from "../../lib/knowledge/registry";
 
 export default async function DashboardPage() {
   const { session, activeOrganization, memberships } = await requireActiveOrganization();
@@ -23,6 +25,7 @@ export default async function DashboardPage() {
   const pendingApprovals = data.approvals.filter((approval) => approval.status === "pending").length;
   const attentionItems = buildAttentionQueue(data);
   const recommendations = buildRecommendations({ ...data, organization: activeOrganizationRecord, membershipCount: data.memberships.length });
+  const knowledgeProviders = knowledgeRegistry.listProviders();
 
   return (
     <main className="shell executiveShell">
@@ -38,6 +41,7 @@ export default async function DashboardPage() {
         <AgentStatusPanel agents={data.agents} activity={data.activity} />
         <SystemHealth health={data.health} />
       </section>
+      <KnowledgeDashboard providers={knowledgeProviders} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">
         <PriorityTasks tasks={data.tasks} />
