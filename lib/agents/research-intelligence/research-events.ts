@@ -1,0 +1,1 @@
+export type ResearchEventType="research.created"|"query.created"|"source.added"|"citation.added"|"evidence.added"|"brief.ready"|"monitoring.due"; export function researchEvent(type:ResearchEventType,subjectId:string,metadata:Record<string,unknown>={}){return{id:`${type}-${subjectId}`,type,subjectId,metadata,at:new Date().toISOString()};}

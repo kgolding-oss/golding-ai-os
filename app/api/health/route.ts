@@ -2,18 +2,20 @@ import { NextResponse } from "next/server";
 import { getPlatformHealth, logger } from "../../../lib/observability";
 
 export const dynamic = "force-dynamic";
-
-
 export async function GET() {
   try {
     const health = await getPlatformHealth();
+
     const executiveIntelligence = {
       status: "healthy",
-      message: "Executive Intelligence Engine is registered for deterministic analysis.",
+      message:
+        "Executive Intelligence Engine is registered for deterministic analysis.",
     };
+
     const autonomousOperations = {
       status: "healthy",
-      message: "Autonomous Operations is registered with live execution disabled.",
+      message:
+        "Autonomous Operations is registered with live execution disabled.",
     };
 
     const { chiefOfStaffHealthSnapshot } = await import("../../../lib/agents/chief-of-staff");
@@ -22,12 +24,19 @@ export async function GET() {
     const { financeOperationsHealthSnapshot } = await import("../../../lib/agents/finance-operations");
     const { crmHealthSnapshot } = await import("../../../lib/agents/crm");
     const { mediaCommunicationsHealthSnapshot } = await import("../../../lib/agents/media-communications");
+    const { researchIntelligenceHealthSnapshot } = await import("../../../lib/agents/research-intelligence");
+
     const { githubHealthSnapshot } = await import("../../../lib/connectors/providers/github");
     const { vercelHealthSnapshot } = await import("../../../lib/connectors/providers/vercel");
     const { openAIHealthSnapshot } = await import("../../../lib/connectors/providers/openai");
     const { mcpHealthSnapshot } = await import("../../../lib/connectors/providers/mcp");
-    const { aiTelemetrySummary, modelRegistry, promptRegistry, toolRegistry } = await import("../../../lib/ai");
-   
+
+    const {
+      aiTelemetrySummary,
+      modelRegistry,
+      promptRegistry,
+      toolRegistry,
+    } = await import("../../../lib/ai");
 
     const chiefOfStaff = chiefOfStaffHealthSnapshot();
     const grantDevelopment = grantDevelopmentHealthSnapshot();
@@ -35,8 +44,11 @@ export async function GET() {
     const financeOperations = financeOperationsHealthSnapshot();
     const crm = crmHealthSnapshot();
     const mediaCommunications = mediaCommunicationsHealthSnapshot();
+    const researchIntelligence = researchIntelligenceHealthSnapshot();
+
     const github = githubHealthSnapshot();
     const vercel = vercelHealthSnapshot();
+
     const aiPlatform = {
       openai: openAIHealthSnapshot(),
       mcp: mcpHealthSnapshot(),
@@ -60,12 +72,20 @@ export async function GET() {
         grantDevelopment,
         propertyAssets,
         financeOperations,
-        crm,mediaCommunications,
+        crm,
+        mediaCommunications,
+        researchIntelligence,
       },
       { status },
     );
   } catch (error) {
-    logger.error("health.route.failed", "Health route failed safely.", error, undefined, { subsystem: "health" });
+    logger.error(
+      "health.route.failed",
+      "Health route failed safely.",
+      error,
+      undefined,
+      { subsystem: "health" },
+    );
 
     return NextResponse.json(
       {

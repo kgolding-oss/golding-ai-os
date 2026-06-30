@@ -1,0 +1,4 @@
+import type { ResearchCitation, ResearchSource } from "./research-types";
+export const demoCitations:ResearchCitation[]=[{id:"cite-uscis-1",researchItemId:"research-immigration-policy",sourceId:"source-uscis-policy",paraphraseMetadata:{summary:"Policy metadata collected for reviewer synthesis."},authorityLevel:"official",reviewStatus:"needs_review"}];
+export function validateCitation(c:ResearchCitation,sources:ResearchSource[]){return sources.some(s=>s.id===c.sourceId)?[]:[`Citation ${c.id} references an unknown source; never treat it as authoritative.`]}
+export function citationReport(citations=demoCitations,sources:ResearchSource[]=[]){return{citations:citations.length,verified:citations.filter(c=>c.reviewStatus==="reviewed").length,needsReview:citations.filter(c=>c.reviewStatus!=="reviewed").length,invalid:citations.flatMap(c=>validateCitation(c,sources))}}
