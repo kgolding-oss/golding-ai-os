@@ -1,0 +1,4 @@
+import { repositoryFrom } from "./repository";
+import { correlationId } from "./serializer";
+import type { AuditEventRecord, PersistenceContext } from "./types";
+export async function recordSystemAuditEvent(context: PersistenceContext, input: { action: string; status?: string; entityTable?: string; entityId?: string; payload?: unknown; result?: unknown; error?: unknown }) { return repositoryFrom(context).insert<AuditEventRecord>("system_audit_events", { organization_id: context.organizationId, created_by: context.profileId ?? null, correlation_id: context.correlationId ?? correlationId("audit"), status: input.status ?? "succeeded", payload: input.payload, result: input.result, error_details: input.error, action: input.action, entity_table: input.entityTable, entity_id: input.entityId } as never); }

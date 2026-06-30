@@ -1,0 +1,13 @@
+export type PersistenceStatus = "queued" | "running" | "succeeded" | "failed" | "cancelled" | "healthy" | "degraded" | "unhealthy" | "unknown";
+export type JsonMap = Record<string, unknown>;
+export type PersistenceContext = { token?: string | null; organizationId?: string | null; profileId?: string | null; correlationId?: string | null };
+export type PersistentRecord = { id: string; organization_id: string | null; created_by: string | null; agent_id: string | null; workflow_id: string | null; correlation_id: string | null; status: string; payload: JsonMap | null; result: JsonMap | null; error_details: JsonMap | null; created_at: string; updated_at?: string | null; completed_at?: string | null };
+export type CommandExecutionRecord = PersistentRecord & { command_text?: string | null };
+export type WorkflowExecutionRecord = PersistentRecord & { execution_id?: string | null };
+export type WorkflowExecutionStepRecord = PersistentRecord & { execution_id?: string | null; step_name?: string | null; started_at?: string | null };
+export type OrchestrationMessageRecord = PersistentRecord & { message_type?: string | null; sender_agent_id?: string | null; recipient_agent_id?: string | null };
+export type OrchestrationTaskRecord = PersistentRecord & { task_id?: string | null };
+export type OrchestrationEventRecord = PersistentRecord & { event_type?: string | null; task_id?: string | null };
+export type HealthSnapshotRecord = PersistentRecord & { snapshot_type?: "agent" | "release" | "knowledge" | string; subject_id?: string | null };
+export type AuditEventRecord = PersistentRecord & { action?: string | null; entity_table?: string | null; entity_id?: string | null };
+export type OperatingHistory = { commands: CommandExecutionRecord[]; workflows: WorkflowExecutionRecord[]; orchestrationEvents: OrchestrationEventRecord[]; failedEvents: PersistentRecord[]; healthSnapshots: HealthSnapshotRecord[] };

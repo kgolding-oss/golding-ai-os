@@ -2,6 +2,7 @@ import { AbstractBaseAgent } from "./base-agent";
 import { commandRegistry } from "./command-registry";
 import type { CommandAgentContext, CommandAgentInput } from "./command-registry";
 import type { AgentRunResult } from "../types/agent";
+import { recordCommandExecution } from "../persistence";
 
 export class ExecutiveCommandAgent extends AbstractBaseAgent<CommandAgentInput> {
   constructor() {
@@ -33,7 +34,9 @@ export class ExecutiveCommandAgent extends AbstractBaseAgent<CommandAgentInput> 
   async run(context: CommandAgentContext): Promise<AgentRunResult> {
     const commandText = context.input?.command ?? "";
     if (!commandText.trim()) return commandRegistry.help(commandText);
-    return commandRegistry.execute(context, commandText);
+    const result = await commandRegistry.execute(context, commandText);
+    await recordCommandExecution({ token: context.accessToken, organizationId: context.organizationId, profileId: context.userId }, { commandText, status: result.errors.length ? "failed" : "succeeded", agentId: this.id, result: result.output, error: result.errors.length ? { errors: result.errors } : undefined });
+    return result;
   }
 }
 
