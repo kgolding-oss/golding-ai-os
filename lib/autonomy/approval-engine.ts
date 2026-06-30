@@ -1,0 +1,15 @@
+import type { ApprovalAction, ApprovalDecision, ApprovalEvidence, ApprovalLevel, ApprovalRequest, ApprovalStatus } from "./approval-types";
+import { evaluateApprovalPolicy } from "./approval-policies";
+const iso = (d = new Date()) => d.toISOString();
+const add = (ms: number, d = new Date()) => new Date(d.getTime() + ms).toISOString();
+export class ApprovalEngine { private approvals = new Map<string, ApprovalDecision>();
+  evaluateApproval(request: ApprovalRequest, now = new Date()): ApprovalDecision { const policy = evaluateApprovalPolicy(request); const status = policy.level === "automatic" ? "approved" : "pending"; const decision: ApprovalDecision = { id: `approval-${request.planId}-${request.taskId}`, taskId: request.taskId, planId: request.planId, organizationId: request.organizationId, level: policy.level, status, timestamp: iso(now), reason: policy.reason, expiration: add(policy.expiresInMs, now), evidence: request.evidence ?? [], requiredParties: policy.requiredParties, grantedParties: policy.level === "automatic" ? [] : [] }; this.approvals.set(decision.id, decision); return decision; }
+  approve(id: string, approver: string, reason: string, evidence: ApprovalEvidence[] = [], party?: ApprovalLevel, now = new Date()) { return this.transition(id, "approve", approver, reason, evidence, party, now); }
+  reject(id: string, approver: string, reason: string, evidence: ApprovalEvidence[] = [], now = new Date()) { return this.transition(id, "reject", approver, reason, evidence, undefined, now); }
+  defer(id: string, approver: string, reason: string, expiration: string, evidence: ApprovalEvidence[] = [], now = new Date()) { const next = this.transition(id, "defer", approver, reason, evidence, undefined, now); next.expiration = expiration; return next; }
+  expire(id: string, reason = "Approval expired.", now = new Date()) { return this.transition(id, "expire", undefined, reason, [], undefined, now); }
+  list(status?: ApprovalDecision["status"]) { return Array.from(this.approvals.values()).filter((a) => !status || a.status === status); }
+  get(id: string) { return this.approvals.get(id); }
+  private transition(id: string, action: ApprovalAction, approver: string | undefined, reason: string, evidence: ApprovalEvidence[], party: ApprovalLevel | undefined, now: Date): ApprovalDecision { const current = this.approvals.get(id); if (!current) throw new Error(`Approval not found: ${id}`); const granted = party && current.requiredParties.includes(party) ? Array.from(new Set([...current.grantedParties, party])) : current.grantedParties; const status: ApprovalStatus = action === "approve" ? (current.level === "multi_party" && granted.length < current.requiredParties.length ? "pending" : "approved") : action === "reject" ? "rejected" : action === "defer" ? "deferred" : "expired"; const next: ApprovalDecision = { ...current, status, approver, reason, timestamp: iso(now), evidence: [...current.evidence, ...evidence], grantedParties: granted }; this.approvals.set(id, next); return next; }
+}
+export const approvalEngine = new ApprovalEngine();

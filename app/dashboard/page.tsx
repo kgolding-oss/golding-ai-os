@@ -18,6 +18,7 @@ import { RecommendationPanel } from "../../components/dashboard/RecommendationPa
 import { SystemHealth } from "../../components/dashboard/SystemHealth";
 import { DiagnosticsPanel } from "../../components/dashboard/DiagnosticsPanel";
 import { ExecutiveIntelligenceDashboard } from "../../components/intelligence/ExecutiveIntelligenceDashboard";
+import { AutonomousOperationsPanel } from "../../components/autonomy/AutonomousOperationsPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
@@ -30,6 +31,7 @@ import { aiRuntime } from "../../lib/runtime";
 import { connectorManager } from "../../lib/connectors";
 import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observability";
 import { executiveIntelligenceEngine } from "../../lib/intelligence";
+import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recoveryEngine } from "../../lib/autonomy";
 
 async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
   try { return { health: await getPlatformHealth({ token, organizationId }), diagnostics: runDiagnostics() }; }
@@ -60,6 +62,8 @@ export default async function DashboardPage() {
   const connectorSessions = connectorManager.runtime.sessions.filter((connectorSession) => !activeOrganizationRecord?.id || connectorSession.context.organizationId === activeOrganizationRecord.id);
   const connectorDiagnostics = connectorManager.diagnostics();
   const executiveSnapshot = executiveIntelligenceEngine.analyze({ organization: activeOrganizationRecord, dashboard: data, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory });
+  const autonomousPlan = autonomyEngine.createExecutionPlan({ organization: activeOrganizationRecord ? { id: activeOrganizationRecord.id, name: activeOrganizationRecord.name } : null, executiveIntelligence: executiveSnapshot, workflows, runtimeTools, connectors, knowledgeHealth, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, operatingHistory, source: "dashboard" });
+  if (!autonomousScheduler.list().some((schedule) => schedule.planId === autonomousPlan.id)) autonomousScheduler.schedule(autonomousPlan.id, autonomousPlan.organizationId, { type: "delayed", delayMs: 300000 });
 
   return (
     <main className="shell executiveShell">
@@ -84,6 +88,7 @@ export default async function DashboardPage() {
       <EnterpriseConnectorsPanel connectors={connectors} sessions={connectorSessions} diagnostics={connectorDiagnostics} />
       <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
       <ExecutiveIntelligenceDashboard snapshot={executiveSnapshot} />
+      <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">
