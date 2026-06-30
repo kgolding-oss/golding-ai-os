@@ -1,0 +1,3 @@
+import type { MaintenanceRecord } from "./property-types";
+export const demoMaintenance: MaintenanceRecord[] = [{ id:"mnt-hvac", assetId:"asset-hvac-1", type:"preventative", title:"Quarterly HVAC preventative service reminder", dueAt:"2026-06-15", status:"overdue", warrantyCovered:false, serviceHistory:["2026-01 filter replacement"], reminderOnly:true }, { id:"mnt-hq", propertyId:"prop-hq", type:"recurring", title:"Office safety walk-through reminder", dueAt:"2026-07-05", status:"due", warrantyCovered:false, serviceHistory:[], reminderOnly:true }];
+export const overdueMaintenance = (items:MaintenanceRecord[]) => items.filter(i=>i.status==="overdue");
