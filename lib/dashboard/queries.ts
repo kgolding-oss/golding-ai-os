@@ -24,6 +24,15 @@ function scopedQuery(activeOrganizationId: string | null | undefined, extras: st
   return query(["select=*", filter, ...extras]);
 }
 
+async function getOptionalRows<T>(table: string, token: string, query = "?select=*") {
+  try {
+    return await getRows<T>(table, token, query);
+  } catch (error) {
+    console.error(`Dashboard data source unavailable: ${table}`, error);
+    return [];
+  }
+}
+
 export async function getDashboardData(token: string, activeOrganizationId?: string | null): Promise<DashboardData> {
   const organizationQuery = activeOrganizationId ? query(["select=*", `id=eq.${encodeURIComponent(activeOrganizationId)}`, "order=updated_at.desc"]) : null;
   const projectQuery = scopedQuery(activeOrganizationId, ["order=updated_at.desc", "limit=25"]);
@@ -36,16 +45,16 @@ export async function getDashboardData(token: string, activeOrganizationId?: str
   const preferenceQuery = activeOrganizationId ? query(["select=profile_id,active_organization_id,updated_at", `active_organization_id=eq.${encodeURIComponent(activeOrganizationId)}`, "limit=25"]) : null;
 
   const [organizations, projects, tasks, approvals, agents, activity, health, auditLogs, memberships, userPreferences] = await Promise.all([
-    organizationQuery ? getRows<Organization>("organizations", token, organizationQuery) : Promise.resolve([]),
-    projectQuery ? getRows<Project>("projects", token, projectQuery) : Promise.resolve([]),
-    taskQuery ? getRows<Task>("tasks", token, taskQuery) : Promise.resolve([]),
-    approvalQuery ? getRows<Approval>("approvals", token, approvalQuery) : Promise.resolve([]),
-    agentQuery ? getRows<Agent>("agent_registry", token, agentQuery) : Promise.resolve([]),
-    activityQuery ? getRows<Activity>("agent_activity", token, activityQuery) : Promise.resolve([]),
-    getRows<Health>("system_health", token, "?select=*&order=service_name"),
-    auditQuery ? getRows<AuditLog>("audit_logs", token, auditQuery) : Promise.resolve([]),
-    membershipQuery ? getRows<Membership>("organization_memberships", token, membershipQuery) : Promise.resolve([]),
-    preferenceQuery ? getRows<UserPreference>("user_preferences", token, preferenceQuery) : Promise.resolve([]),
+    organizationQuery ? getOptionalRows<Organization>("organizations", token, organizationQuery) : Promise.resolve([]),
+    projectQuery ? getOptionalRows<Project>("projects", token, projectQuery) : Promise.resolve([]),
+    taskQuery ? getOptionalRows<Task>("tasks", token, taskQuery) : Promise.resolve([]),
+    approvalQuery ? getOptionalRows<Approval>("approvals", token, approvalQuery) : Promise.resolve([]),
+    agentQuery ? getOptionalRows<Agent>("agent_registry", token, agentQuery) : Promise.resolve([]),
+    activityQuery ? getOptionalRows<Activity>("agent_activity", token, activityQuery) : Promise.resolve([]),
+    getOptionalRows<Health>("system_health", token, "?select=*&order=service_name"),
+    auditQuery ? getOptionalRows<AuditLog>("audit_logs", token, auditQuery) : Promise.resolve([]),
+    membershipQuery ? getOptionalRows<Membership>("organization_memberships", token, membershipQuery) : Promise.resolve([]),
+    preferenceQuery ? getOptionalRows<UserPreference>("user_preferences", token, preferenceQuery) : Promise.resolve([]),
   ]);
 
   return { organizations, projects, tasks, approvals, agents, activity, health, auditLogs, memberships, userPreferences };

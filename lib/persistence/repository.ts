@@ -16,7 +16,12 @@ export class PersistenceRepository {
   }
   async list<T extends PersistentRecord>(table: string, organizationId?: string | null, limit = 10, extra = ""): Promise<T[]> {
     if (!this.token || !organizationId) return [];
-    return getRows<T>(table, this.token, `?select=*&organization_id=eq.${encodeURIComponent(organizationId)}${extra}&order=created_at.desc&limit=${limit}`);
+    try {
+      return await getRows<T>(table, this.token, `?select=*&organization_id=eq.${encodeURIComponent(organizationId)}${extra}&order=created_at.desc&limit=${limit}`);
+    } catch (error) {
+      console.error(`Operating history source unavailable: ${table}`, error);
+      return [];
+    }
   }
 }
 export function repositoryFrom(context: PersistenceContext) { return new PersistenceRepository(context.token); }
