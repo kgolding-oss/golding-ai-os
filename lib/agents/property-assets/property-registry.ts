@@ -1,0 +1,6 @@
+import type { PropertyRecord } from "./property-types";
+export const propertyLifecycleRegistry = ["planned","active","maintenance","under_review","disposed"] as const;
+export const propertyOwnershipRegistry = ["owned","leased","donated","managed"] as const;
+export function isRegisteredPropertyLifecycle(v:string){ return propertyLifecycleRegistry.includes(v as any); }
+export function isRegisteredOwnershipStatus(v:string){ return propertyOwnershipRegistry.includes(v as any); }
+export const demoProperties: PropertyRecord[] = [{ id:"prop-hq", organizationId:"demo", organization:"Demo Organization", name:"Headquarters Office", address:"100 Main Street", ownershipStatus:"leased", occupancy:82, zoningMetadata:{ zoning:"commercial", jurisdiction:"city" }, insuranceMetadata:{ carrier:"sample", renewal:"2026-09-01" }, maintenanceStatus:"due", inspectionStatus:"current", lifecycleStatus:"active" }, { id:"prop-warehouse", organizationId:"demo", organization:"Demo Organization", name:"Community Warehouse", address:"200 Supply Ave", ownershipStatus:"managed", occupancy:64, zoningMetadata:{ zoning:"warehouse" }, insuranceMetadata:{ carrier:"sample", gap:"contents_review" }, maintenanceStatus:"current", inspectionStatus:"due", lifecycleStatus:"active" }];

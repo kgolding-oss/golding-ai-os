@@ -1,0 +1,5 @@
+import type { ApprovalGate } from "./property-types";
+export const PROPERTY_APPROVAL_GATES: Record<ApprovalGate,string> = { maintenance_authorization:"Maintenance authorizations require Approval Engine approval.", contractor_assignment:"Contractor assignments require Approval Engine approval.", vendor_change:"Vendor changes require Approval Engine approval.", lease_modification:"Lease modifications require Approval Engine approval.", capital_project:"Capital projects require Approval Engine approval.", asset_disposal:"Asset disposal requires Approval Engine approval.", insurance_change:"Insurance changes require Approval Engine approval." };
+export function requiresPropertyApproval(action:string){ return Object.entries(PROPERTY_APPROVAL_GATES).filter(([gate])=>action.includes(gate)).map(([gate,message])=>({ gate, message })); }
+export const AI_ALLOWED_PROPERTY_ACTIONS = ["summaries","classification","maintenance note extraction","inspection summaries","duplicate detection","document organization"];
+export const AI_DENIED_PROPERTY_ACTIONS = ["authorize work","purchase assets","approve expenditures","sign contracts","execute maintenance","schedule contractors"];
