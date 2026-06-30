@@ -21,6 +21,7 @@ import { ExecutiveIntelligenceDashboard } from "../../components/intelligence/Ex
 import { AutonomousOperationsPanel } from "../../components/autonomy/AutonomousOperationsPanel";
 import { ChiefOfStaffPanel } from "../../components/chief-of-staff/ChiefOfStaffPanel";
 import { GrantDevelopmentPanel } from "../../components/grant-development/GrantDevelopmentPanel";
+import { CrmRelationshipPanel } from "../../components/crm/CrmRelationshipPanel";
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
@@ -37,6 +38,7 @@ import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observabili
 import { executiveIntelligenceEngine } from "../../lib/intelligence";
 import { chiefOfStaffRuntime } from "../../lib/agents/chief-of-staff";
 import { grantDevelopmentRuntime } from "../../lib/agents/grant-development";
+import { crmRuntime } from "../../lib/agents/crm";
 import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recoveryEngine } from "../../lib/autonomy";
 import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary } from "../../lib/ai";
 import { mcpRegistry } from "../../lib/connectors/providers/mcp";
@@ -77,6 +79,7 @@ export default async function DashboardPage() {
   const aiOperationsScore = Math.max(0, Math.min(100, 50 + aiModels.length * 10 + aiTools.length * 3 - aiTelemetry.sessions.failures * 10));
   const executiveSnapshot = executiveIntelligenceEngine.analyze({ organization: activeOrganizationRecord, dashboard: data, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory });
   const grantSnapshot = grantDevelopmentRuntime.synthesize({ organizationId: activeOrganizationRecord?.id, now: new Date() });
+  const crmSnapshot = crmRuntime.synthesize({ organizationId: activeOrganizationRecord?.id, now: new Date() });
   const chiefOfStaffSnapshot = await chiefOfStaffRuntime.synthesize({ organization: activeOrganizationRecord, dashboard: data, executiveIntelligence: executiveSnapshot, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory, autonomousPlans: autonomyEngine.listPlans(), pendingApprovals: approvalEngine.list() }, { token: session.access_token, organizationId: activeOrganizationRecord?.id, profileId: session.user?.id });
   const autonomousPlan = autonomyEngine.createExecutionPlan({ organization: activeOrganizationRecord ? { id: activeOrganizationRecord.id, name: activeOrganizationRecord.name } : null, executiveIntelligence: executiveSnapshot, workflows, runtimeTools, connectors, knowledgeHealth, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, operatingHistory, source: "dashboard" });
   if (!autonomousScheduler.list().some((schedule) => schedule.planId === autonomousPlan.id)) autonomousScheduler.schedule(autonomousPlan.id, autonomousPlan.organizationId, { type: "delayed", delayMs: 300000 });
@@ -108,6 +111,7 @@ export default async function DashboardPage() {
       <ExecutiveIntelligenceDashboard snapshot={executiveSnapshot} />
       <ChiefOfStaffPanel snapshot={chiefOfStaffSnapshot} />
       <GrantDevelopmentPanel snapshot={grantSnapshot} />
+      <CrmRelationshipPanel snapshot={crmSnapshot} />
       <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />

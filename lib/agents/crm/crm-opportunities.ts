@@ -1,0 +1,1 @@
+import type { CrmRelationship } from "./crm-types"; export const strategicCrmOpportunities=(relationships:CrmRelationship[])=>relationships.filter((r)=>r.opportunityValue>=50000||r.partnershipStatus==="strategic");
