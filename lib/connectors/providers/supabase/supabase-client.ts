@@ -1,0 +1,4 @@
+import { resolveSupabaseAuth, supabaseAuthorizationHeader } from "./supabase-auth";
+import { SupabaseConnectorError } from "./supabase-errors";
+export class SupabaseRestClient { async request<T>(path: string, init: RequestInit = {}): Promise<T> { const auth = resolveSupabaseAuth(); const headers = supabaseAuthorizationHeader(auth); if (!auth.url || !headers) throw new SupabaseConnectorError("SUPABASE_AUTH_REQUIRED", "Supabase authentication is not configured.", 401); const response = await fetch(`${auth.url}${path}`, { ...init, headers: { ...headers, "Content-Type": "application/json", ...(init.headers ?? {}) } }); if (!response.ok) throw new SupabaseConnectorError("SUPABASE_API_ERROR", `Supabase API request failed with ${response.status}.`, response.status); if (response.status === 204) return {} as T; return response.json() as Promise<T>; } }
+export const supabaseClient = new SupabaseRestClient();

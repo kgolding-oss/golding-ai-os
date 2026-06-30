@@ -1,0 +1,2 @@
+export class SupabaseConnectorError extends Error { constructor(public code: string, message: string, public status?: number) { super(message); this.name = "SupabaseConnectorError"; } }
+export const sanitizeSupabaseError = (error: unknown) => error instanceof SupabaseConnectorError ? { code: error.code, message: error.message, status: error.status } : { code: "SUPABASE_UNKNOWN", message: error instanceof Error ? error.message : String(error) };

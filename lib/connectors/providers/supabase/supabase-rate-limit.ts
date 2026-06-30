@@ -1,0 +1,2 @@
+const buckets = new Map<string, number[]>();
+export function checkSupabaseRateLimit(key: string, limit = 600, windowMs = 60000) { const now = Date.now(); const hits = (buckets.get(key) ?? []).filter((t) => now - t < windowMs); const allowed = hits.length < limit; if (allowed) hits.push(now); buckets.set(key, hits); return { allowed, remaining: Math.max(0, limit - hits.length), resetAt: new Date(now + windowMs).toISOString(), utilization: Math.round((hits.length / limit) * 100) / 100 }; }
