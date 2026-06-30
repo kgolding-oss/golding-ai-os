@@ -2,6 +2,7 @@ import type { KnowledgeProvider } from "./provider";
 import { searchKnowledgeProviders } from "./search";
 import type { IndexingProvider, KnowledgeDocument, KnowledgeProviderId, KnowledgeProviderMetadata, KnowledgeProviderResponse, KnowledgeSearchQuery, KnowledgeSearchResult, MemoryProvider, SearchProvider } from "./types";
 import { GmailKnowledgeProvider, GoogleDriveKnowledgeProvider, LocalFilesKnowledgeProvider, SupabaseDocumentsKnowledgeProvider } from "./providers/stubs";
+import { FinanceKnowledgeProvider } from "../agents/finance-operations/finance-memory";
 
 export class KnowledgeRegistry {
   private memoryProviders = new Map<KnowledgeProviderId, MemoryProvider>();
@@ -23,5 +24,5 @@ export class KnowledgeRegistry {
   listIndexingJobs() { return Array.from(this.indexingProviders.values()).flatMap((provider) => provider.listJobs().data); }
 }
 
-export function createDefaultKnowledgeRegistry() { return new KnowledgeRegistry().register(new GoogleDriveKnowledgeProvider()).register(new GmailKnowledgeProvider()).register(new LocalFilesKnowledgeProvider()).register(new SupabaseDocumentsKnowledgeProvider()); }
+export function createDefaultKnowledgeRegistry() { return new KnowledgeRegistry().register(new GoogleDriveKnowledgeProvider()).register(new GmailKnowledgeProvider()).register(new LocalFilesKnowledgeProvider()).register(new SupabaseDocumentsKnowledgeProvider()).register(new FinanceKnowledgeProvider()); }
 export const knowledgeRegistry = createDefaultKnowledgeRegistry();
