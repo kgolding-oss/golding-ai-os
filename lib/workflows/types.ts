@@ -11,6 +11,8 @@ export type WorkflowContext<TInput = unknown> = {
   organizationId?: string | null;
   userId?: string | null;
   now?: Date;
+  accessToken?: string | null;
+  correlationId?: string | null;
 };
 
 export type WorkflowValidationResult = { valid: boolean; errors: string[] };

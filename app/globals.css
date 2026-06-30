@@ -229,3 +229,7 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .recommendation strong { color: var(--champagne-gold); }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 920px) { .commandBar, .briefGrid, .statusSummary, .insightGrid { grid-template-columns: 1fr; } }
+
+.historyGrid { display: grid; gap: 18px; }
+.historyGrid h3 { color: var(--champagne-gold); margin-top: 8px; }
+.muted { color: var(--muted); }

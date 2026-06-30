@@ -8,6 +8,7 @@ import { ExecutiveWorkflowPanel } from "../../components/dashboard/ExecutiveWork
 import { MetricsGrid } from "../../components/dashboard/MetricsGrid";
 import { KnowledgeDashboard } from "../../components/knowledge/KnowledgeDashboard";
 import { Navigation } from "../../components/dashboard/Navigation";
+import { OperatingHistory } from "../../components/dashboard/OperatingHistory";
 import { OrganizationsWidget } from "../../components/dashboard/OrganizationsWidget";
 import { PriorityTasks } from "../../components/dashboard/PriorityTasks";
 import { RecentActivity } from "../../components/dashboard/RecentActivity";
@@ -20,6 +21,7 @@ import { getDashboardData } from "../../lib/dashboard/queries";
 import { buildKnowledgeHealthReport, knowledgeRegistry } from "../../lib/knowledge";
 import { AgentOrchestrator } from "../../lib/orchestration";
 import { workflowEngine } from "../../lib/workflows";
+import { getOperatingHistory } from "../../lib/persistence";
 
 export default async function DashboardPage() {
   const { session, activeOrganization, memberships } = await requireActiveOrganization();
@@ -32,6 +34,7 @@ export default async function DashboardPage() {
   const knowledgeHealth = buildKnowledgeHealthReport(knowledgeRegistry);
   const workflows = workflowEngine.listWorkflows();
   const agentOrchestrator = AgentOrchestrator.fromDashboardAgents(data.agents);
+  const operatingHistory = await getOperatingHistory({ token: session.access_token, organizationId: activeOrganizationRecord?.id, profileId: session.user?.id });
 
   return (
     <main className="shell executiveShell">
@@ -52,6 +55,7 @@ export default async function DashboardPage() {
         <ExecutiveWorkflowPanel workflows={workflows} />
       </section>
       <KnowledgeDashboard health={knowledgeHealth} />
+      <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">
         <PriorityTasks tasks={data.tasks} />

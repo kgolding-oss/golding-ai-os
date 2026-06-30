@@ -17,6 +17,7 @@ export type AgentRunContext<TInput = unknown, TState = unknown> = {
   organizationId?: string | null;
   userId?: string | null;
   now?: Date;
+  accessToken?: string | null;
 };
 
 export type AgentRunResult<TData = unknown> = {

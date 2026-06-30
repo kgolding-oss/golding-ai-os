@@ -1,0 +1,4 @@
+import { repositoryFrom } from "./repository";
+import { correlationId } from "./serializer";
+import type { HealthSnapshotRecord, PersistenceContext } from "./types";
+export async function recordHealthSnapshot(context: PersistenceContext, input: { type: "agent" | "release" | "knowledge" | string; subjectId?: string | null; status: string; payload?: unknown; result?: unknown; agentId?: string | null; error?: unknown }) { return repositoryFrom(context).insert<HealthSnapshotRecord>("health_snapshots", { organization_id: context.organizationId, created_by: context.profileId ?? null, agent_id: input.agentId ?? null, correlation_id: context.correlationId ?? correlationId("health"), status: input.status, payload: input.payload, result: input.result, error_details: input.error, snapshot_type: input.type, subject_id: input.subjectId ?? null } as never); }
