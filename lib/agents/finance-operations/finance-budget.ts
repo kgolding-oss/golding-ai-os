@@ -1,0 +1,1 @@
+import type { Budget,BudgetHealth } from "./finance-types"; export function evaluateBudgets(budgets:Budget[]):BudgetHealth[]{return budgets.map(b=>{const remaining=b.allocated-b.committed-b.spent;const variance=b.allocated-b.forecast;const status=remaining<0||variance<0?"risk":remaining<b.allocated*.1?"watch":"ok";return {...b,remaining,variance,status};});}
