@@ -1,0 +1,2 @@
+export class VercelConnectorError extends Error { constructor(public code: string, message: string, public status?: number) { super(message); this.name = "VercelConnectorError"; } }
+export const sanitizeVercelError = (error: unknown) => error instanceof VercelConnectorError ? { code: error.code, message: error.message, status: error.status } : { code: "VERCEL_UNKNOWN", message: error instanceof Error ? error.message.replace(/Bearer\s+\S+/gi, "Bearer redacted") : String(error) };

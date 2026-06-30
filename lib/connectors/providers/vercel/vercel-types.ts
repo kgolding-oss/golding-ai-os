@@ -1,0 +1,8 @@
+export type VercelAuthMode = "personal" | "team" | "project" | "oauth" | "none";
+export type VercelOAuthProvider = { getAuthorizationUrl(state: string): string; exchangeCode(code: string): Promise<{ accessToken: string; expiresAt?: string; refreshToken?: string }>; refresh?(refreshToken: string): Promise<{ accessToken: string; expiresAt?: string }> };
+export type VercelRuntimeInput = { teamId?: string; projectId?: string; projectName?: string; deploymentId?: string; domain?: string; target?: "production" | "preview" | "development"; since?: number; until?: number; limit?: number; approved?: boolean; [key: string]: unknown };
+export type VercelTelemetryMetric = { operationId: string; status: "success" | "failure" | "denied"; durationMs: number; correlationId: string; at: string; details?: Record<string, unknown> };
+export type VercelRateLimit = { limit?: number; remaining?: number; reset?: string; retryAfterMs?: number };
+export type VercelDeploymentSummary = { id: string; url?: string; state?: string; target?: string; createdAt?: number; ready?: number; buildingAt?: number; source?: string };
+export type VercelHealthSignal = { id: string; severity: "low" | "medium" | "high" | "critical"; title: string; recommendation: string; evidence: string[] };
+export type VercelReadinessSnapshot = { readinessScore: number; productionHealth: string; deploymentStatus: string; previewDeployments: number; buildFailures: number; runtimeHealth: string; domains: number; ssl: string; functions: number; logs: { errors: number; warnings: number; p95LatencyMs: number }; recommendations: string[]; capturedAt: string };
