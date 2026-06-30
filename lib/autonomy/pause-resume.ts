@@ -1,0 +1,1 @@
+import type { AutonomousSession } from "./autonomous-session"; export function pauseSession(session: AutonomousSession, reason: string): AutonomousSession { return { ...session, status: "paused", failures: [...session.failures, `Paused: ${reason}`] }; } export function resumeSession(session: AutonomousSession): AutonomousSession { return { ...session, status: "running" }; }

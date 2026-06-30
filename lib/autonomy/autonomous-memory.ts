@@ -1,0 +1,1 @@
+import type { ExecutionPlan } from "./execution-plan"; export class AutonomousMemory { private plans: ExecutionPlan[] = []; rememberPlan(plan: ExecutionPlan) { this.plans = [plan, ...this.plans.filter((p) => p.id !== plan.id)].slice(0, 50); return plan; } listPlans() { return this.plans; } } export const autonomousMemory = new AutonomousMemory();
