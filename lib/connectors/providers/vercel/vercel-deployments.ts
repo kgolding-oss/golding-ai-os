@@ -1,0 +1,6 @@
+import { vercelClient } from "./vercel-client";
+import type { VercelDeploymentSummary, VercelRuntimeInput } from "./vercel-types";
+const q = (i: VercelRuntimeInput) => new URLSearchParams(Object.entries({ limit: i.limit ?? 20, projectId: i.projectId, target: i.target, from: i.since, until: i.until }).filter(([,v]) => v !== undefined).map(([k,v]) => [k, String(v)])).toString();
+export async function listVercelDeployments(i: VercelRuntimeInput) { return vercelClient.request(`/v6/deployments?${q(i)}`); }
+export async function getVercelDeployment(i: VercelRuntimeInput) { return vercelClient.request(`/v13/deployments/${i.deploymentId}`); }
+export function deploymentHealth(deployments: VercelDeploymentSummary[]) { const failed = deployments.filter((d) => ["ERROR","CANCELED","FAILED"].includes(String(d.state))).length; const latest = deployments[0]; const latency = deployments.map((d) => d.ready && d.buildingAt ? d.ready - d.buildingAt : 0).filter(Boolean); return { latestState: latest?.state ?? "unknown", failedDeployments: failed, excessiveBuildFailures: failed >= 3, averageDeploymentLatencyMs: Math.round(latency.reduce((s,v)=>s+v,0)/Math.max(latency.length,1)), rollbackReady: Boolean(latest?.id && latest.state === "READY"), staleProduction: latest?.createdAt ? Date.now() - latest.createdAt > 1000*60*60*24*30 : false }; }

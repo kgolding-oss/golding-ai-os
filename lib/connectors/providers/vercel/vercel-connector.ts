@@ -1,0 +1,6 @@
+import type { ConnectorDefinition } from "../../connector-types";
+import { vercelCapabilities, vercelOperations, vercelPermissions, vercelResources } from "./vercel-capabilities";
+import { createVercelHealth } from "./vercel-health";
+import { executeVercelOperation } from "./vercel-runtime";
+export function createVercelConnector(): ConnectorDefinition { return { id: "vercel", name: "Vercel", provider: "Vercel", category: "deployment", description: "Production enterprise deployment connector routed through Connector Runtime, approvals, telemetry, organization isolation, and executive intelligence.", version: "11.0.0-d", organizationScope: "organization", authentication: { strategies: ["personal_access_token", "oauth2"], defaultStrategy: "personal_access_token", requiresUserConsent: true }, permissions: vercelPermissions, capabilities: vercelCapabilities, supportedOperations: vercelOperations, supportedResources: vercelResources, rateLimits: [{ limit: 1000, windowMs: 60000, deterministicBurst: 50 }], retryPolicy: { maxRetries: 2, backoffMs: 750 }, timeoutMs: 20000, health: createVercelHealth(), deterministic: false, supportsStreaming: false, supportsAsync: true, supportsWebhooks: true, supportsEvents: true, securityClassification: "confidential", execute: executeVercelOperation }; }
+export const vercelConnector = createVercelConnector();

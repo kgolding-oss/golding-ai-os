@@ -1,0 +1,4 @@
+import { vercelClient } from "./vercel-client";
+import type { VercelRuntimeInput } from "./vercel-types";
+export async function listVercelEnvironmentMetadata(i: VercelRuntimeInput) { const project = i.projectId ?? i.projectName; if (!project) return { envs: [], valuesExposed: false }; const data: any = await vercelClient.request(`/v9/projects/${project}/env`); return { envs: (data.envs ?? []).map((e: any) => ({ id: e.id, key: e.key, target: e.target, type: e.type, createdAt: e.createdAt, updatedAt: e.updatedAt, value: undefined })), valuesExposed: false }; }
+export function validateEnvironmentMetadata(envs: { key: string }[], required: string[] = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]) { const keys = new Set(envs.map((e) => e.key)); const missing = required.filter((key) => !keys.has(key)); return { complete: missing.length === 0, missingVariables: missing, valuesExposed: false }; }

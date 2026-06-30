@@ -1,0 +1,4 @@
+import type { VercelTelemetryMetric } from "./vercel-types";
+const metrics: VercelTelemetryMetric[] = [];
+export function recordVercelTelemetry(metric: VercelTelemetryMetric) { metrics.push(metric); if (metrics.length > 500) metrics.shift(); }
+export function vercelTelemetrySummary() { const failures = metrics.filter((m) => m.status === "failure").length; return { requests: metrics.length, failures, policyDenials: metrics.filter((m) => m.status === "denied").length, apiLatencyMs: Math.round(metrics.reduce((s,m)=>s+m.durationMs,0)/Math.max(metrics.length,1)), deploymentFailures: metrics.filter((m)=>m.operationId.includes("deployment") && m.status === "failure").length, runtimeFailures: metrics.filter((m)=>m.operationId.includes("logs") && m.status === "failure").length, functionFailures: metrics.filter((m)=>m.operationId.includes("functions") && m.status === "failure").length, retries: 0, recent: metrics.slice(-20) }; }

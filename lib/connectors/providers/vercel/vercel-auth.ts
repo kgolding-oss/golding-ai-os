@@ -1,0 +1,7 @@
+import type { ConnectorAuthState } from "../../connector-types";
+import type { VercelAuthMode, VercelOAuthProvider } from "./vercel-types";
+export type VercelAuthConfig = { mode: VercelAuthMode; token?: string; teamId?: string; projectId?: string; oauth?: VercelOAuthProvider };
+export function resolveVercelAuth(): VercelAuthConfig { if (process.env.VERCEL_PROJECT_TOKEN) return { mode: "project", token: process.env.VERCEL_PROJECT_TOKEN, projectId: process.env.VERCEL_PROJECT_ID }; if (process.env.VERCEL_TEAM_TOKEN) return { mode: "team", token: process.env.VERCEL_TEAM_TOKEN, teamId: process.env.VERCEL_TEAM_ID }; if (process.env.VERCEL_TOKEN) return { mode: "personal", token: process.env.VERCEL_TOKEN, teamId: process.env.VERCEL_TEAM_ID }; return { mode: "none" }; }
+export function vercelAuthState(config = resolveVercelAuth()): ConnectorAuthState { return { strategy: config.mode === "oauth" ? "oauth2" : config.mode === "none" ? "none" : "personal_access_token", status: config.mode === "none" ? "not_configured" : "authenticated", authenticatedAt: config.mode === "none" ? undefined : new Date().toISOString(), diagnostics: [config.mode === "none" ? "Vercel credentials are not configured; live deployment operations fail safely." : `Vercel ${config.mode} authentication configured without exposing credentials.`] }; }
+export function vercelAuthorizationHeader(config = resolveVercelAuth()) { if (!config.token) return undefined; return `Bearer ${config.token}`; }
+export const redactVercelSecret = (value?: string) => value ? `${value.slice(0, 3)}…redacted` : "";
