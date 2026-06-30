@@ -1,4 +1,74 @@
 import { NextResponse } from "next/server";
 import { getPlatformHealth, logger } from "../../../lib/observability";
+
 export const dynamic = "force-dynamic";
-export async function GET() { try { const health = await getPlatformHealth(); const executiveIntelligence = { status: "healthy", message: "Executive Intelligence Engine is registered for deterministic analysis." }; const autonomousOperations = { status: "healthy", message: "Autonomous Operations is registered with live execution disabled." }; const { chiefOfStaffHealthSnapshot } = await import("../../../lib/agents/chief-of-staff"); const chiefOfStaff = chiefOfStaffHealthSnapshot(); const { grantDevelopmentHealthSnapshot } = await import("../../../lib/agents/grant-development"); const grantDevelopment = grantDevelopmentHealthSnapshot(); const { propertyHealthSnapshot } = await import("../../../lib/agents/property-assets"); const propertyAssets = propertyHealthSnapshot(); const { githubHealthSnapshot } = await import("../../../lib/connectors/providers/github"); const { vercelHealthSnapshot } = await import("../../../lib/connectors/providers/vercel"); const { openAIHealthSnapshot } = await import("../../../lib/connectors/providers/openai"); const { mcpHealthSnapshot } = await import("../../../lib/connectors/providers/mcp"); const { aiTelemetrySummary, modelRegistry, promptRegistry, toolRegistry } = await import("../../../lib/ai"); const github = githubHealthSnapshot(); const vercel = vercelHealthSnapshot(); const aiPlatform = { openai: openAIHealthSnapshot(), mcp: mcpHealthSnapshot(), telemetry: aiTelemetrySummary(), models: modelRegistry.health(), prompts: promptRegistry.list().length, tools: toolRegistry.metrics() }; const status = health.status === "unhealthy" ? 503 : 200; return NextResponse.json({ ...health, executiveIntelligence, autonomousOperations, github, vercel, aiPlatform, chiefOfStaff, grantDevelopment, propertyAssets }, { status }); } catch (error) { logger.error("health.route.failed", "Health route failed safely.", error, undefined, { subsystem: "health" }); return NextResponse.json({ status: "unhealthy", subsystems: [], warnings: [], errors: ["Health report failed."], timestamp: new Date().toISOString() }, { status: 503 }); } }
+
+export async function GET() {
+  try {
+    const health = await getPlatformHealth();
+    const executiveIntelligence = {
+      status: "healthy",
+      message: "Executive Intelligence Engine is registered for deterministic analysis.",
+    };
+    const autonomousOperations = {
+      status: "healthy",
+      message: "Autonomous Operations is registered with live execution disabled.",
+    };
+
+    const { chiefOfStaffHealthSnapshot } = await import("../../../lib/agents/chief-of-staff");
+    const { grantDevelopmentHealthSnapshot } = await import("../../../lib/agents/grant-development");
+    const { propertyHealthSnapshot } = await import("../../../lib/agents/property-assets");
+    const { financeOperationsHealthSnapshot } = await import("../../../lib/agents/finance-operations");
+    const { githubHealthSnapshot } = await import("../../../lib/connectors/providers/github");
+    const { vercelHealthSnapshot } = await import("../../../lib/connectors/providers/vercel");
+    const { openAIHealthSnapshot } = await import("../../../lib/connectors/providers/openai");
+    const { mcpHealthSnapshot } = await import("../../../lib/connectors/providers/mcp");
+    const { aiTelemetrySummary, modelRegistry, promptRegistry, toolRegistry } = await import("../../../lib/ai");
+
+    const chiefOfStaff = chiefOfStaffHealthSnapshot();
+    const grantDevelopment = grantDevelopmentHealthSnapshot();
+    const propertyAssets = propertyHealthSnapshot();
+    const financeOperations = financeOperationsHealthSnapshot();
+    const github = githubHealthSnapshot();
+    const vercel = vercelHealthSnapshot();
+    const aiPlatform = {
+      openai: openAIHealthSnapshot(),
+      mcp: mcpHealthSnapshot(),
+      telemetry: aiTelemetrySummary(),
+      models: modelRegistry.health(),
+      prompts: promptRegistry.list().length,
+      tools: toolRegistry.metrics(),
+    };
+
+    const status = health.status === "unhealthy" ? 503 : 200;
+
+    return NextResponse.json(
+      {
+        ...health,
+        executiveIntelligence,
+        autonomousOperations,
+        github,
+        vercel,
+        aiPlatform,
+        chiefOfStaff,
+        grantDevelopment,
+        propertyAssets,
+        financeOperations,
+      },
+      { status },
+    );
+  } catch (error) {
+    logger.error("health.route.failed", "Health route failed safely.", error, undefined, { subsystem: "health" });
+
+    return NextResponse.json(
+      {
+        status: "unhealthy",
+        subsystems: [],
+        warnings: [],
+        errors: ["Health report failed."],
+        timestamp: new Date().toISOString(),
+      },
+      { status: 503 },
+    );
+  }
+}
