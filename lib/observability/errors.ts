@@ -1,0 +1,6 @@
+import type { ErrorKind, SafeSerializedError } from "./types";
+const SECRET_KEYS = /token|secret|password|apikey|authorization|cookie|key/i;
+export class PlatformError extends Error { constructor(public kind: ErrorKind, message: string, public code = kind.toUpperCase(), public recoverable = true, public metadata: Record<string, unknown> = {}) { super(message); this.name = "PlatformError"; } }
+export function redactMetadata(metadata?: Record<string, unknown>) { if (!metadata) return undefined; return Object.fromEntries(Object.entries(metadata).map(([key, value]) => [key, SECRET_KEYS.test(key) ? "[redacted]" : value])); }
+export function serializeError(error: unknown): SafeSerializedError { if (error instanceof PlatformError) return { name: error.name, message: error.message, kind: error.kind, code: error.code, recoverable: error.recoverable, metadata: redactMetadata(error.metadata) }; if (error instanceof Error) return { name: error.name, message: error.message }; return { name: "NonError", message: String(error) }; }
+export const platformError = (kind: ErrorKind, message: string, metadata?: Record<string, unknown>) => new PlatformError(kind, message, kind.toUpperCase(), kind !== "fatal", metadata);

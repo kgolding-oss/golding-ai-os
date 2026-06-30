@@ -15,6 +15,7 @@ import { PriorityTasks } from "../../components/dashboard/PriorityTasks";
 import { RecentActivity } from "../../components/dashboard/RecentActivity";
 import { RecommendationPanel } from "../../components/dashboard/RecommendationPanel";
 import { SystemHealth } from "../../components/dashboard/SystemHealth";
+import { DiagnosticsPanel } from "../../components/dashboard/DiagnosticsPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
@@ -24,6 +25,16 @@ import { AgentOrchestrator } from "../../lib/orchestration";
 import { workflowEngine } from "../../lib/workflows";
 import { getOperatingHistory } from "../../lib/persistence";
 import { aiRuntime } from "../../lib/runtime";
+import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observability";
+
+async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
+  try { return { health: await getPlatformHealth({ token, organizationId }), diagnostics: runDiagnostics() }; }
+  catch (error) {
+    logger.error("dashboard.diagnostics.failed", "Dashboard diagnostics failed safely.", error, undefined, { subsystem: "dashboard" });
+    const timestamp = new Date().toISOString();
+    return { health: { status: "unhealthy" as const, subsystems: [], warnings: [], errors: ["Diagnostics failed safely."], timestamp }, diagnostics: { status: "unhealthy" as const, findings: [{ severity: "error" as const, subsystem: "diagnostics", id: "dashboard", message: "Diagnostics panel failed safely." }], counts: { tools: 0, workflows: 0, commands: 0, knowledgeProviders: 0, orchestrationAgents: 0 }, timestamp } };
+  }
+}
 
 export default async function DashboardPage() {
   const { session, activeOrganization, memberships } = await requireActiveOrganization();
@@ -40,6 +51,7 @@ export default async function DashboardPage() {
   const runtimeTools = aiRuntime.registry.listTools();
   const runtimeSessions = aiRuntime.executor.sessions.filter((runtimeSession) => !activeOrganizationRecord?.id || runtimeSession.organizationId === activeOrganizationRecord.id);
   const runtimeMetrics = aiRuntime.telemetry.metrics();
+  const diagnosticsSnapshot = await safeDiagnostics(session.access_token, activeOrganizationRecord?.id);
 
   return (
     <main className="shell executiveShell">
@@ -61,6 +73,7 @@ export default async function DashboardPage() {
       </section>
       <KnowledgeDashboard health={knowledgeHealth} />
       <AIRuntimePanel tools={runtimeTools} sessions={runtimeSessions} metrics={runtimeMetrics} />
+      <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">

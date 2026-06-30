@@ -1,5 +1,6 @@
 import { getRows } from "../supabase/data";
 import { organizationFilter } from "../activeOrganization";
+import { logger } from "../observability";
 
 export type Organization = { id: string; name: string; slug?: string; mission?: string | null; industry?: string | null; status?: string | null; executive?: string | null; primary_color?: string | null; secondary_color?: string | null; updated_at?: string | null; created_at?: string | null };
 export type Project = { id: string; name?: string | null; title?: string | null; status?: string | null; updated_at?: string | null; created_at?: string | null };
@@ -28,7 +29,7 @@ async function getOptionalRows<T>(table: string, token: string, query = "?select
   try {
     return await getRows<T>(table, token, query);
   } catch (error) {
-    console.error(`Dashboard data source unavailable: ${table}`, error);
+    logger.error("dashboard.datasource.unavailable", `Dashboard data source unavailable: ${table}`, error, { table }, { subsystem: "dashboard-data" });
     return [];
   }
 }

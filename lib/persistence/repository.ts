@@ -2,6 +2,7 @@ import { getRows, supabaseRequest } from "../supabase/data";
 import { safeJson } from "./serializer";
 import type { OperatingHistory, PersistenceContext, PersistentRecord } from "./types";
 import { hasPersistenceContext, requireOrganizationId } from "./validators";
+import { logger } from "../observability";
 
 export type InsertRecord = Partial<PersistentRecord> & { organization_id?: string | null; payload?: unknown; result?: unknown; error_details?: unknown };
 
@@ -19,7 +20,7 @@ export class PersistenceRepository {
     try {
       return await getRows<T>(table, this.token, `?select=*&organization_id=eq.${encodeURIComponent(organizationId)}${extra}&order=created_at.desc&limit=${limit}`);
     } catch (error) {
-      console.error(`Operating history source unavailable: ${table}`, error);
+      logger.error("persistence.history_source.unavailable", `Operating history source unavailable: ${table}`, error, { table }, { subsystem: "persistence", organizationId });
       return [];
     }
   }
