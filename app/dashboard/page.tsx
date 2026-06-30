@@ -16,7 +16,7 @@ import { currentPath, requireActiveOrganization } from "../../lib/activeOrganiza
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
 import { getDashboardData } from "../../lib/dashboard/queries";
-import { knowledgeRegistry } from "../../lib/knowledge/registry";
+import { buildKnowledgeHealthReport, knowledgeRegistry } from "../../lib/knowledge";
 import { workflowEngine } from "../../lib/workflows";
 
 export default async function DashboardPage() {
@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   const pendingApprovals = data.approvals.filter((approval) => approval.status === "pending").length;
   const attentionItems = buildAttentionQueue(data);
   const recommendations = buildRecommendations({ ...data, organization: activeOrganizationRecord, membershipCount: data.memberships.length });
-  const knowledgeProviders = knowledgeRegistry.listProviders();
+  const knowledgeHealth = buildKnowledgeHealthReport(knowledgeRegistry);
   const workflows = workflowEngine.listWorkflows();
 
   return (
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
         <SystemHealth health={data.health} />
       </section>
       <ExecutiveWorkflowPanel workflows={workflows} />
-      <KnowledgeDashboard providers={knowledgeProviders} />
+      <KnowledgeDashboard health={knowledgeHealth} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">
         <PriorityTasks tasks={data.tasks} />
