@@ -1,0 +1,1 @@
+import type { McpServer } from "./mcp-types"; export function validateMcpServer(s:McpServer){const errors:string[]=[]; if(!s.id)errors.push("MCP server id is required."); if(!s.endpoint)errors.push("MCP endpoint is required."); return {valid:errors.length===0,errors};}

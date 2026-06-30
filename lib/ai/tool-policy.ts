@@ -1,0 +1,1 @@
+import type { ToolDefinition } from "./model-types"; export function evaluateToolPolicy(tool:ToolDefinition,permissions:string[]=[]){const missing=tool.permissions.filter(p=>!permissions.includes(p)); return {allowed:missing.length===0&&!tool.destructive&&!tool.requiresApproval,missingPermissions:missing,requiresApproval:tool.requiresApproval||tool.destructive};}

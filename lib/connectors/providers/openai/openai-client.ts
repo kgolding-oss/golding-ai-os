@@ -1,0 +1,2 @@
+import type { OpenAIConnectorConfig, OpenAIModelMetadata } from "./openai-types"; import { resolveOpenAIAuth } from "./openai-auth";
+export class OpenAIClient{constructor(private config:OpenAIConnectorConfig={}){} auth(){return resolveOpenAIAuth(this.config)} async discoverModels():Promise<OpenAIModelMetadata[]>{return [];} async execute(){return {message:"Live OpenAI calls are disabled in this architecture milestone."};}}

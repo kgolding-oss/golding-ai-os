@@ -19,6 +19,8 @@ import { SystemHealth } from "../../components/dashboard/SystemHealth";
 import { DiagnosticsPanel } from "../../components/dashboard/DiagnosticsPanel";
 import { ExecutiveIntelligenceDashboard } from "../../components/intelligence/ExecutiveIntelligenceDashboard";
 import { AutonomousOperationsPanel } from "../../components/autonomy/AutonomousOperationsPanel";
+import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
+import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
@@ -32,6 +34,8 @@ import { connectorManager } from "../../lib/connectors";
 import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observability";
 import { executiveIntelligenceEngine } from "../../lib/intelligence";
 import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recoveryEngine } from "../../lib/autonomy";
+import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary } from "../../lib/ai";
+import { mcpRegistry } from "../../lib/connectors/providers/mcp";
 
 async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
   try { return { health: await getPlatformHealth({ token, organizationId }), diagnostics: runDiagnostics() }; }
@@ -61,6 +65,12 @@ export default async function DashboardPage() {
   const connectors = connectorManager.list();
   const connectorSessions = connectorManager.runtime.sessions.filter((connectorSession) => !activeOrganizationRecord?.id || connectorSession.context.organizationId === activeOrganizationRecord.id);
   const connectorDiagnostics = connectorManager.diagnostics();
+  const aiTelemetry = aiTelemetrySummary();
+  const aiModels = modelRegistry.list();
+  const aiPrompts = promptRegistry.list();
+  const aiTools = toolRegistry.list();
+  const mcpServers = mcpRegistry.list();
+  const aiOperationsScore = Math.max(0, Math.min(100, 50 + aiModels.length * 10 + aiTools.length * 3 - aiTelemetry.sessions.failures * 10));
   const executiveSnapshot = executiveIntelligenceEngine.analyze({ organization: activeOrganizationRecord, dashboard: data, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory });
   const autonomousPlan = autonomyEngine.createExecutionPlan({ organization: activeOrganizationRecord ? { id: activeOrganizationRecord.id, name: activeOrganizationRecord.name } : null, executiveIntelligence: executiveSnapshot, workflows, runtimeTools, connectors, knowledgeHealth, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, operatingHistory, source: "dashboard" });
   if (!autonomousScheduler.list().some((schedule) => schedule.planId === autonomousPlan.id)) autonomousScheduler.schedule(autonomousPlan.id, autonomousPlan.organizationId, { type: "delayed", delayMs: 300000 });
@@ -85,6 +95,8 @@ export default async function DashboardPage() {
       </section>
       <KnowledgeDashboard health={knowledgeHealth} />
       <AIRuntimePanel tools={runtimeTools} sessions={runtimeSessions} metrics={runtimeMetrics} />
+      <AIPlatformPanel models={aiModels} prompts={aiPrompts} tools={aiTools} mcpServers={mcpServers} sessions={aiTelemetry.sessions} costs={{ tokens: aiTelemetry.tokens, costUsd: aiTelemetry.costUsd, latencyMs: aiTelemetry.latencyMs }} />
+      <AIOperationsPanel score={aiOperationsScore} items={{ aiReadiness: aiModels.length ? "ready" : "awaiting model registration", modelHealth: `${aiModels.length} registered`, mcpHealth: `${mcpServers.length} servers`, promptQuality: `${aiPrompts.length} versions`, toolReadiness: `${aiTools.length} tools`, executionEfficiency: `${aiTelemetry.sessions.completed} completed`, costEfficiency: `$${aiTelemetry.costUsd.toFixed(6)}` }} />
       <EnterpriseConnectorsPanel connectors={connectors} sessions={connectorSessions} diagnostics={connectorDiagnostics} />
       <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
       <ExecutiveIntelligenceDashboard snapshot={executiveSnapshot} />

@@ -1,0 +1,1 @@
+import { mcpRegistry } from "./mcp-registry"; import { mcpTools } from "./mcp-tools"; export function mcpHealthSnapshot(){const servers=mcpRegistry.list(); return {status:servers.some(s=>s.status==="unhealthy")?"degraded":"healthy",servers:servers.length,tools:mcpTools.list().length,unhealthy:servers.filter(s=>s.status==="unhealthy").length};}

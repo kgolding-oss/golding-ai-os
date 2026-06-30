@@ -1,0 +1,1 @@
+import type { McpSession } from "./mcp-types"; const sessions:McpSession[]=[]; export function createMcpSession(serverId:string,metadata:Record<string,unknown>={}){const s={id:`mcp_sess_${sessions.length+1}`,serverId,status:"active" as const,createdAt:new Date().toISOString(),metadata}; sessions.unshift(s); return s;} export function listMcpSessions(){return sessions;}

@@ -1,0 +1,1 @@
+import type { ToolDefinition } from "./model-types"; export function validateAiTool(t:ToolDefinition){const errors:string[]=[]; if(!t.id)errors.push("Tool id is required."); if(!t.provider)errors.push("Tool provider is required."); if(!t.permissions.length)errors.push("Tool permissions are required."); return {valid:errors.length===0,errors};}

@@ -1,0 +1,1 @@
+import type { OpenAIConnectorConfig } from "./openai-types"; export function validateOpenAIConfig(config:OpenAIConnectorConfig={}){return {valid:Boolean(config.apiKey||process.env.OPENAI_API_KEY),errors:(config.apiKey||process.env.OPENAI_API_KEY)?[]:["OPENAI_API_KEY is not configured; live execution remains disabled."]};}

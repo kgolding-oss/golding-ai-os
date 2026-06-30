@@ -1,0 +1,1 @@
+import { openAICapabilities } from "./openai-capabilities"; import { openAIHealthSnapshot } from "./openai-health"; export const openAIConnector={id:"openai",name:"OpenAI Runtime Provider",provider:"openai",capabilities:openAICapabilities,health:openAIHealthSnapshot()};
