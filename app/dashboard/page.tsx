@@ -7,6 +7,7 @@ import { ExecutiveBrief } from "../../components/dashboard/ExecutiveBrief";
 import { ExecutiveWorkflowPanel } from "../../components/dashboard/ExecutiveWorkflowPanel";
 import { MetricsGrid } from "../../components/dashboard/MetricsGrid";
 import { KnowledgeDashboard } from "../../components/knowledge/KnowledgeDashboard";
+import { AIRuntimePanel } from "../../components/runtime/AIRuntimePanel";
 import { Navigation } from "../../components/dashboard/Navigation";
 import { OperatingHistory } from "../../components/dashboard/OperatingHistory";
 import { OrganizationsWidget } from "../../components/dashboard/OrganizationsWidget";
@@ -22,6 +23,7 @@ import { buildKnowledgeHealthReport, knowledgeRegistry } from "../../lib/knowled
 import { AgentOrchestrator } from "../../lib/orchestration";
 import { workflowEngine } from "../../lib/workflows";
 import { getOperatingHistory } from "../../lib/persistence";
+import { aiRuntime } from "../../lib/runtime";
 
 export default async function DashboardPage() {
   const { session, activeOrganization, memberships } = await requireActiveOrganization();
@@ -35,6 +37,9 @@ export default async function DashboardPage() {
   const workflows = workflowEngine.listWorkflows();
   const agentOrchestrator = AgentOrchestrator.fromDashboardAgents(data.agents);
   const operatingHistory = await getOperatingHistory({ token: session.access_token, organizationId: activeOrganizationRecord?.id, profileId: session.user?.id });
+  const runtimeTools = aiRuntime.registry.listTools();
+  const runtimeSessions = aiRuntime.executor.sessions.filter((runtimeSession) => !activeOrganizationRecord?.id || runtimeSession.organizationId === activeOrganizationRecord.id);
+  const runtimeMetrics = aiRuntime.telemetry.metrics();
 
   return (
     <main className="shell executiveShell">
@@ -55,6 +60,7 @@ export default async function DashboardPage() {
         <ExecutiveWorkflowPanel workflows={workflows} />
       </section>
       <KnowledgeDashboard health={knowledgeHealth} />
+      <AIRuntimePanel tools={runtimeTools} sessions={runtimeSessions} metrics={runtimeMetrics} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">

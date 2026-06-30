@@ -1,0 +1,4 @@
+import type { RuntimeExecutionContext, RuntimeResult, RuntimeSession } from "./runtime-types";
+import { runtimeId } from "./runtime-events";
+export function createRuntimeSession(context: RuntimeExecutionContext): RuntimeSession { return { id: runtimeId("session"), organizationId: context.organizationId, workflowId: context.workflowId, agentId: context.agentId, userId: context.userId, context, memoryContext: context.memoryContext, permissions: context.permissions, toolsUsed: [], timeline: [], events: [], errors: [], startedAt: new Date().toISOString() }; }
+export function completeRuntimeSession(session: RuntimeSession, result: RuntimeResult): RuntimeSession { const completedAt = new Date().toISOString(); return { ...session, completedAt, durationMs: Date.parse(completedAt) - Date.parse(session.startedAt), result }; }
