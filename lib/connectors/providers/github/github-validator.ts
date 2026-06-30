@@ -1,0 +1,2 @@
+import type { ConnectorExecutionRequest } from "../../connector-types";
+export function validateGitHubRequest(request: ConnectorExecutionRequest) { const errors: string[] = []; if (!request.context.organizationId) errors.push("organizationId is required for organization isolation."); if (!request.context.runtimeSessionId) errors.push("runtimeSessionId is required."); if (!request.context.correlationId) errors.push("correlationId is required."); return { valid: errors.length === 0, errors }; }

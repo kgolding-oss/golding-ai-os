@@ -1,0 +1,6 @@
+import type { ConnectorDefinition } from "../../connector-types";
+import { githubCapabilities, githubOperations, githubPermissions, githubResources } from "./github-capabilities";
+import { createGitHubHealth } from "./github-health";
+import { executeGitHubOperation } from "./github-runtime";
+export function createGitHubConnector(): ConnectorDefinition { return { id: "github", name: "GitHub", provider: "GitHub", category: "code", description: "Live enterprise GitHub connector routed through runtime, policy, approval, telemetry, and organization isolation.", version: "11.0.0-a", organizationScope: "organization", authentication: { strategies: ["jwt", "personal_access_token", "oauth2"], defaultStrategy: "personal_access_token", requiresUserConsent: true }, permissions: githubPermissions, capabilities: githubCapabilities, supportedOperations: githubOperations, supportedResources: githubResources, rateLimits: [{ limit: 5000, windowMs: 3600000, deterministicBurst: 100 }], retryPolicy: { maxRetries: 2, backoffMs: 500 }, timeoutMs: 15000, health: createGitHubHealth(), deterministic: false, supportsStreaming: false, supportsAsync: true, supportsWebhooks: true, supportsEvents: true, securityClassification: "confidential", execute: executeGitHubOperation }; }
+export const githubConnector = createGitHubConnector();
