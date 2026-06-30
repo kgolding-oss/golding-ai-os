@@ -1,0 +1,1 @@
+export const PROPERTY_EVENTS = { dashboardGenerated:"property.dashboard.generated", registryUpdated:"property.registry.updated", assetReviewed:"property.asset.reviewed", maintenanceReminder:"property.maintenance.reminder", inspectionAlert:"property.inspection.alert", approvalRequired:"property.approval.required" } as const;

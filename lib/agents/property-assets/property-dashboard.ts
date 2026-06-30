@@ -1,0 +1,2 @@
+import type { PropertySnapshot } from "./property-types";
+export function buildPropertyDashboard(s:PropertySnapshot){ return { properties:s.properties.length, buildings:s.buildings.length, activeProjects:s.projects.filter(p=>p.status!=="complete").length, maintenanceCalendar:s.maintenance, upcomingInspections:s.inspections, assetInventory:s.assets.length+s.inventory.length, vehicles:s.vehicles.length, vendorActivity:s.vendors, leaseRenewals:s.leases, propertyRisks:s.recommendations.filter(r=>r.severity==="critical"||r.severity==="high") }; }
