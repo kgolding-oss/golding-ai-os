@@ -1,0 +1,13 @@
+export type GrantOpportunityType = "federal"|"state"|"local"|"foundation"|"corporate"|"community"|"international"|"private"|"sponsorship";
+export type FundingStage = "discovered"|"qualified"|"loi"|"application"|"interview"|"awarded"|"declined"|"reporting"|"renewal";
+export type GrantDeadlineType = "loi"|"application"|"interview"|"reporting"|"renewal"|"sponsor_deliverable"|"compliance";
+export type GrantDocumentType = "narrative"|"budget"|"board_list"|"irs_document"|"financials"|"audit"|"letter_of_support"|"attachment"|"submitted_package";
+export type GrantApproval = { id: string; label: string; status: "pending"|"approved"|"rejected"; requiredBy: string };
+export type GrantDocument = { id: string; type: GrantDocumentType; title: string; status: "missing"|"draft"|"ready"|"submitted"; provider: "google_drive"|"google_docs"|"google_sheets"|"knowledge_os"|"manual"; metadata: Record<string,string>; updatedAt: string };
+export type GrantDeadline = { id: string; opportunityId: string; type: GrantDeadlineType; dueAt: string; owner: string; status: "upcoming"|"due_soon"|"overdue"|"complete" };
+export type GrantOpportunity = { id: string; organizationId: string; organization: string; opportunity: string; type: GrantOpportunityType; funder: string; program: string; eligibility: "unknown"|"eligible"|"ineligible"|"needs_review"; amount: number; probability: number; deadline: string; stage: FundingStage; owner: string; requiredDocuments: GrantDocument[]; approvals: GrantApproval[]; reportingRequirements: string[]; renewalSchedule: string; strategicAlignment: number; effort: number; reportingBurden: number; sponsorLastContactAt?: string };
+export type GrantScore = { opportunityId: string; eligibility: number; strategicAlignment: number; effort: number; probability: number; fundingImpact: number; reportingBurden: number; urgency: number; priorityScore: number; explanation: string[]; scoredAt: string };
+export type GrantRecommendation = { id: string; severity: "critical"|"high"|"medium"|"low"; title: string; action: string; opportunityId?: string };
+export type GrantSnapshot = { opportunities: GrantOpportunity[]; deadlines: GrantDeadline[]; scores: GrantScore[]; recommendations: GrantRecommendation[]; pipelineValue: number; weightedForecast: number; missingDocuments: GrantDocument[]; reportingStatus: string[]; telemetry: GrantTelemetrySummary; generatedAt: string };
+export type GrantTelemetryEvent = { id: string; kind: "opportunity"|"deadline"|"score"|"document"|"reporting"|"trend"; at: string; message: string; metadata?: Record<string, unknown> };
+export type GrantTelemetrySummary = { opportunities: number; deadlines: number; scores: number; documents: number; reporting: number; trends: number; recent: GrantTelemetryEvent[] };

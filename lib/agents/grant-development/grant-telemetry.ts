@@ -1,0 +1,3 @@
+import type { GrantTelemetryEvent } from "./grant-types";
+class GrantTelemetry { private events: GrantTelemetryEvent[]=[]; record(kind: GrantTelemetryEvent["kind"], message:string, metadata?:Record<string,unknown>){ this.events.unshift({id:`grant-tel-${Date.now()}-${this.events.length}`,kind,at:new Date().toISOString(),message,metadata}); this.events=this.events.slice(0,50);} summary(){ const c=(k:string)=>this.events.filter((e)=>e.kind===k).length; return { opportunities:c("opportunity"), deadlines:c("deadline"), scores:c("score"), documents:c("document"), reporting:c("reporting"), trends:c("trend"), recent:this.events.slice(0,10)}; }}
+export const grantTelemetry = new GrantTelemetry();

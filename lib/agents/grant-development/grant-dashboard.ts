@@ -1,0 +1,2 @@
+import type { GrantSnapshot } from "./grant-types";
+export function buildGrantDashboard(snapshot: GrantSnapshot){ return { activeOpportunities:snapshot.opportunities.length, pipelineValue:snapshot.pipelineValue, upcomingDeadlines:snapshot.deadlines.filter(d=>d.status!=="complete"), missingDocuments:snapshot.missingDocuments, renewalSchedule:snapshot.opportunities.map(o=>`${o.opportunity}: ${o.renewalSchedule}`), reportingStatus:snapshot.reportingStatus, fundingForecast:snapshot.weightedForecast, opportunityScores:snapshot.scores }; }

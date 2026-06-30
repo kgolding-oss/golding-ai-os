@@ -1,6 +1,8 @@
 import type { Agent } from "../dashboard/queries";
 import type { AgentRunContext, AgentRunResult, BaseAgent } from "../types/agent";
 import { executiveCommandAgent } from "../agents/command-agent";
+import { chiefOfStaffAgent } from "../agents/chief-of-staff";
+import { grantDevelopmentAgent } from "../agents/grant-development";
 import type { RegisteredAgent } from "./types";
 class DashboardRegisteredAgent implements BaseAgent {
   health = "healthy" as const; status = "idle" as const; version = "dashboard"; organizationScope = "organization" as const; availableCommands = []; availableTools = [];
@@ -11,6 +13,6 @@ class DashboardRegisteredAgent implements BaseAgent {
   getSummary() { return { title: this.name, summary: this.description, sections: [{ title: "Registry", items: [`Status: ${this.record.status ?? "draft"}`, `Role: ${this.role}`] }], recommendations: this.getRecommendations(), metadata: { source: "dashboard", record: this.record } }; }
 }
 export function buildRegisteredAgents(records: Agent[] = []): RegisteredAgent[] {
-  const system = executiveCommandAgent as unknown as RegisteredAgent; system.source = "system";
-  return [system, ...records.map((record) => { const agent = new DashboardRegisteredAgent(record) as unknown as RegisteredAgent; agent.source = "dashboard"; return agent; })];
+  const systemAgents = [executiveCommandAgent, chiefOfStaffAgent, grantDevelopmentAgent].map((agent) => { const registered = agent as unknown as RegisteredAgent; registered.source = "system"; return registered; });
+  return [...systemAgents, ...records.map((record) => { const agent = new DashboardRegisteredAgent(record) as unknown as RegisteredAgent; agent.source = "dashboard"; return agent; })];
 }
