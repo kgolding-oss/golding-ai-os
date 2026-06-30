@@ -1,0 +1,2 @@
+import type { MemoryObject } from "../types";
+export function summarizeMemoryStatistics(memory: MemoryObject[]) { const providers = new Set(memory.map((item) => item.sourceProvider)); const organizations = new Set(memory.map((item) => item.organizationId)); return { totalMemoryObjects: memory.length, indexedMemoryObjects: memory.filter((item) => item.status === "indexed").length, providers: providers.size, organizations: organizations.size, tags: new Set(memory.flatMap((item) => item.tags)).size, labels: new Set(memory.flatMap((item) => item.labels)).size }; }

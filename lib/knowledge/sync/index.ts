@@ -1,0 +1,3 @@
+import type { KnowledgeProviderMetadata } from "../types";
+export type SyncSnapshot = { status: "idle" | "ready" | "degraded"; staleProviders: KnowledgeProviderMetadata[]; lastSyncAt: string | null };
+export function summarizeSync(providers: KnowledgeProviderMetadata[]): SyncSnapshot { const staleProviders = providers.filter((p) => p.stale || p.status === "degraded" || p.status === "offline"); const syncs = providers.map((p) => p.lastSyncAt).filter((v): v is string => Boolean(v)).sort(); return { status: staleProviders.length ? "degraded" : providers.length ? "ready" : "idle", staleProviders, lastSyncAt: syncs.at(-1) ?? null }; }
