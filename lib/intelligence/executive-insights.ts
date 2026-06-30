@@ -1,0 +1,3 @@
+import type { ExecutiveSnapshot } from "./executive-types";
+export function summarizeTrend(snapshot:Pick<ExecutiveSnapshot,"score"|"risks"|"opportunities"|"bottlenecks">):string{const risk=snapshot.risks.length?`${snapshot.risks.length} ranked risk(s)`:"no ranked risks"; const opp=snapshot.opportunities.length?`${snapshot.opportunities.length} opportunity signal(s)`:"no active opportunities"; return `Executive score ${snapshot.score.overall}/100 with ${risk}, ${opp}, and ${snapshot.bottlenecks.length} bottleneck(s).`;}
+export function explainExecutiveScore(snapshot:ExecutiveSnapshot):string{return snapshot.score.categories.map(c=>`${c.category}: ${c.score} (${c.explanation})`).join(" ");}
