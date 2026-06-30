@@ -1,0 +1,1 @@
+export const grantPolicy = { neverSubmitAutomatically: true, neverEmailFundersAutomatically: true, requiresChiefOfStaffDelegation: true, requiresApprovalEngineForSubmission: true, aiRuntimeAllowedUses: ["summarization","document_comparison","opportunity_classification","draft_organization","requirement_extraction"] };
