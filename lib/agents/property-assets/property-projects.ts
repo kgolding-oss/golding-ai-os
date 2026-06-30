@@ -1,0 +1,3 @@
+import type { ProjectRecord } from "./property-types";
+export const demoProjects: ProjectRecord[] = [{ id:"proj-relocation", organizationId:"demo", type:"relocation", title:"Program team relocation planning", milestones:["requirements","space plan","approval review"], budgetReference:"FY26 facilities placeholder", approvals:["capital_project"], vendors:["vendor-move"], risks:["dependency on lease renewal"], dependencies:["lease-hq"], completionPercentage:35, status:"in_review" }];
+export const delayedProjects = (items:ProjectRecord[]) => items.filter(p=>p.status==="delayed"||p.completionPercentage<50);

@@ -1,0 +1,3 @@
+import type { InspectionRecord } from "./property-types";
+export const demoInspections: InspectionRecord[] = [{ id:"insp-wh-fire", propertyId:"prop-warehouse", title:"Warehouse fire inspection", dueAt:"2026-06-20", violations:[], followUps:["confirm extinguisher tags"], correctiveActions:[], status:"overdue", alertOnly:true }, { id:"insp-van", assetId:"asset-van-1", title:"Vehicle inspection", dueAt:"2026-07-15", violations:[], followUps:[], correctiveActions:[], status:"due", alertOnly:true }];
+export const riskyInspections = (items:InspectionRecord[]) => items.filter(i=>i.status==="overdue"||i.violations.length>0);
