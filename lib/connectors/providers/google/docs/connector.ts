@@ -1,0 +1,6 @@
+import type { ConnectorDefinition } from "../../../connector-types";
+import { docsCapabilities, docsOperations, docsPermissions, docsResources } from "./capabilities";
+import { createDocsHealth } from "./health";
+import { executeDocsOperation } from "./runtime";
+export function createDocsConnector(): ConnectorDefinition { return { id:'google-docs', name:'Google Docs', provider:'Google Workspace', category:'enterprise', description:'Production-ready Google Workspace Google Docs connector routed through Connector Runtime, approvals, telemetry, persistence, and organization isolation.', version:'11.0.0-c', organizationScope:'organization', authentication:{strategies:['oauth2','service_account','bearer_token'], defaultStrategy:'oauth2', requiresUserConsent:true}, permissions:docsPermissions, capabilities:docsCapabilities, supportedOperations:docsOperations, supportedResources:docsResources, rateLimits:[{limit:1000, windowMs:60000, deterministicBurst:100}], retryPolicy:{maxRetries:2, backoffMs:500}, timeoutMs:15000, health:createDocsHealth(), deterministic:false, supportsStreaming:false, supportsAsync:true, supportsWebhooks:true, supportsEvents:true, securityClassification:'restricted', execute:executeDocsOperation }; }
+export const docsConnector = createDocsConnector();

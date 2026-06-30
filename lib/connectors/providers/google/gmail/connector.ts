@@ -1,0 +1,6 @@
+import type { ConnectorDefinition } from "../../../connector-types";
+import { gmailCapabilities, gmailOperations, gmailPermissions, gmailResources } from "./capabilities";
+import { createGmailHealth } from "./health";
+import { executeGmailOperation } from "./runtime";
+export function createGmailConnector(): ConnectorDefinition { return { id:'gmail', name:'Gmail', provider:'Google Workspace', category:'communication', description:'Production-ready Google Workspace Gmail connector routed through Connector Runtime, approvals, telemetry, persistence, and organization isolation.', version:'11.0.0-c', organizationScope:'organization', authentication:{strategies:['oauth2','service_account','bearer_token'], defaultStrategy:'oauth2', requiresUserConsent:true}, permissions:gmailPermissions, capabilities:gmailCapabilities, supportedOperations:gmailOperations, supportedResources:gmailResources, rateLimits:[{limit:1000, windowMs:60000, deterministicBurst:100}], retryPolicy:{maxRetries:2, backoffMs:500}, timeoutMs:15000, health:createGmailHealth(), deterministic:false, supportsStreaming:false, supportsAsync:true, supportsWebhooks:true, supportsEvents:true, securityClassification:'restricted', execute:executeGmailOperation }; }
+export const gmailConnector = createGmailConnector();

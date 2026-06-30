@@ -1,0 +1,6 @@
+import type { ConnectorDefinition } from "../../../connector-types";
+import { calendarCapabilities, calendarOperations, calendarPermissions, calendarResources } from "./capabilities";
+import { createCalendarHealth } from "./health";
+import { executeCalendarOperation } from "./runtime";
+export function createCalendarConnector(): ConnectorDefinition { return { id:'google-calendar', name:'Google Calendar', provider:'Google Workspace', category:'calendar', description:'Production-ready Google Workspace Google Calendar connector routed through Connector Runtime, approvals, telemetry, persistence, and organization isolation.', version:'11.0.0-c', organizationScope:'organization', authentication:{strategies:['oauth2','service_account','bearer_token'], defaultStrategy:'oauth2', requiresUserConsent:true}, permissions:calendarPermissions, capabilities:calendarCapabilities, supportedOperations:calendarOperations, supportedResources:calendarResources, rateLimits:[{limit:1000, windowMs:60000, deterministicBurst:100}], retryPolicy:{maxRetries:2, backoffMs:500}, timeoutMs:15000, health:createCalendarHealth(), deterministic:false, supportsStreaming:false, supportsAsync:true, supportsWebhooks:true, supportsEvents:true, securityClassification:'restricted', execute:executeCalendarOperation }; }
+export const calendarConnector = createCalendarConnector();

@@ -1,0 +1,3 @@
+import { createConnectorHealth } from "../../../connector-health";
+import { resolveGoogleWorkspaceAuth } from "../shared/auth";
+export function createDocsHealth() { const h = createConnectorHealth(); const auth = resolveGoogleWorkspaceAuth(); h.authenticationStatus = auth.configured ? "authenticated" : "not_configured"; h.status = auth.configured ? "healthy" : "degraded"; h.availability = h.status; h.healthScore = auth.configured ? 95 : 72; h.diagnostics = [auth.configured ? "Google Workspace credentials configured." : "Google Workspace credentials are not configured; deterministic runtime surface remains available."]; return h; }

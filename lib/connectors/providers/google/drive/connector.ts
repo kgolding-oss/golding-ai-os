@@ -1,0 +1,6 @@
+import type { ConnectorDefinition } from "../../../connector-types";
+import { driveCapabilities, driveOperations, drivePermissions, driveResources } from "./capabilities";
+import { createDriveHealth } from "./health";
+import { executeDriveOperation } from "./runtime";
+export function createDriveConnector(): ConnectorDefinition { return { id:'google-drive', name:'Google Drive', provider:'Google Workspace', category:'storage', description:'Production-ready Google Workspace Google Drive connector routed through Connector Runtime, approvals, telemetry, persistence, and organization isolation.', version:'11.0.0-c', organizationScope:'organization', authentication:{strategies:['oauth2','service_account','bearer_token'], defaultStrategy:'oauth2', requiresUserConsent:true}, permissions:drivePermissions, capabilities:driveCapabilities, supportedOperations:driveOperations, supportedResources:driveResources, rateLimits:[{limit:1000, windowMs:60000, deterministicBurst:100}], retryPolicy:{maxRetries:2, backoffMs:500}, timeoutMs:15000, health:createDriveHealth(), deterministic:false, supportsStreaming:false, supportsAsync:true, supportsWebhooks:true, supportsEvents:true, securityClassification:'restricted', execute:executeDriveOperation }; }
+export const driveConnector = createDriveConnector();

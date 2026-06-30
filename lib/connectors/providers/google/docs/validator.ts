@@ -1,0 +1,2 @@
+import type { ConnectorExecutionRequest } from "../../../connector-types";
+export function validateDocsRequest(request: ConnectorExecutionRequest) { const errors: string[] = []; if (!request.context.organizationId) errors.push('organization is required'); if (!request.context.runtimeSessionId) errors.push('runtime session is required'); if (!request.context.correlationId) errors.push('correlation ID is required'); return { valid: errors.length === 0, errors }; }
