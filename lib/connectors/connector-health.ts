@@ -1,0 +1,3 @@
+import type { ConnectorDefinition, ConnectorHealth } from "./connector-types";
+export function createConnectorHealth(overrides: Partial<ConnectorHealth> = {}): ConnectorHealth { return { status: "healthy", availability: "healthy", authenticationStatus: "not_configured", registrationStatus: "registered", healthScore: 100, recentFailures: [], averageDurationMs: 0, rateLimitUtilization: 0, warnings: [], diagnostics: ["Deterministic mock connector; no network calls performed."], checkedAt: new Date().toISOString(), ...overrides }; }
+export function connectorHealthSummary(connector: ConnectorDefinition) { return connector.health; }

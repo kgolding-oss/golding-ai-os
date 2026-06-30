@@ -8,6 +8,7 @@ import { ExecutiveWorkflowPanel } from "../../components/dashboard/ExecutiveWork
 import { MetricsGrid } from "../../components/dashboard/MetricsGrid";
 import { KnowledgeDashboard } from "../../components/knowledge/KnowledgeDashboard";
 import { AIRuntimePanel } from "../../components/runtime/AIRuntimePanel";
+import { EnterpriseConnectorsPanel } from "../../components/connectors/EnterpriseConnectorsPanel";
 import { Navigation } from "../../components/dashboard/Navigation";
 import { OperatingHistory } from "../../components/dashboard/OperatingHistory";
 import { OrganizationsWidget } from "../../components/dashboard/OrganizationsWidget";
@@ -25,6 +26,7 @@ import { AgentOrchestrator } from "../../lib/orchestration";
 import { workflowEngine } from "../../lib/workflows";
 import { getOperatingHistory } from "../../lib/persistence";
 import { aiRuntime } from "../../lib/runtime";
+import { connectorManager } from "../../lib/connectors";
 import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observability";
 
 async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
@@ -52,6 +54,9 @@ export default async function DashboardPage() {
   const runtimeSessions = aiRuntime.executor.sessions.filter((runtimeSession) => !activeOrganizationRecord?.id || runtimeSession.organizationId === activeOrganizationRecord.id);
   const runtimeMetrics = aiRuntime.telemetry.metrics();
   const diagnosticsSnapshot = await safeDiagnostics(session.access_token, activeOrganizationRecord?.id);
+  const connectors = connectorManager.list();
+  const connectorSessions = connectorManager.runtime.sessions.filter((connectorSession) => !activeOrganizationRecord?.id || connectorSession.context.organizationId === activeOrganizationRecord.id);
+  const connectorDiagnostics = connectorManager.diagnostics();
 
   return (
     <main className="shell executiveShell">
@@ -73,6 +78,7 @@ export default async function DashboardPage() {
       </section>
       <KnowledgeDashboard health={knowledgeHealth} />
       <AIRuntimePanel tools={runtimeTools} sessions={runtimeSessions} metrics={runtimeMetrics} />
+      <EnterpriseConnectorsPanel connectors={connectors} sessions={connectorSessions} diagnostics={connectorDiagnostics} />
       <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />

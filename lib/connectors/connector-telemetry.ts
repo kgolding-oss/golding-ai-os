@@ -1,0 +1,2 @@
+import { listConnectorEvents } from "./connector-events";
+export function connectorTelemetry() { const events = listConnectorEvents(); const executions = events.filter((e) => e.type === "execution.completed" || e.type === "execution.failed"); return { events: events.length, executions: executions.length, failures: events.filter((e) => e.type === "execution.failed").length, policyDenials: events.filter((e) => e.type === "policy.denied").length, recentEvents: events.slice(-10) }; }

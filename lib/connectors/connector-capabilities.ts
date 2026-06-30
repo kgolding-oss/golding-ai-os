@@ -1,0 +1,2 @@
+import type { ConnectorDefinition } from "./connector-types";
+export function summarizeConnectorCapabilities(connector: ConnectorDefinition) { return { connectorId: connector.id, capabilities: connector.capabilities, operations: connector.supportedOperations, resources: connector.supportedResources, streaming: connector.supportsStreaming, async: connector.supportsAsync, webhooks: connector.supportsWebhooks, events: connector.supportsEvents }; }
