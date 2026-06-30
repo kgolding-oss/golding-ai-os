@@ -19,16 +19,19 @@ export async function GET() {
     const { grantDevelopmentHealthSnapshot } = await import("../../../lib/agents/grant-development");
     const { propertyHealthSnapshot } = await import("../../../lib/agents/property-assets");
     const { financeOperationsHealthSnapshot } = await import("../../../lib/agents/finance-operations");
+    const { crmHealthSnapshot } = await import("../../../lib/agents/crm");
     const { githubHealthSnapshot } = await import("../../../lib/connectors/providers/github");
     const { vercelHealthSnapshot } = await import("../../../lib/connectors/providers/vercel");
     const { openAIHealthSnapshot } = await import("../../../lib/connectors/providers/openai");
     const { mcpHealthSnapshot } = await import("../../../lib/connectors/providers/mcp");
     const { aiTelemetrySummary, modelRegistry, promptRegistry, toolRegistry } = await import("../../../lib/ai");
+   
 
     const chiefOfStaff = chiefOfStaffHealthSnapshot();
     const grantDevelopment = grantDevelopmentHealthSnapshot();
     const propertyAssets = propertyHealthSnapshot();
     const financeOperations = financeOperationsHealthSnapshot();
+    const crm = crmHealthSnapshot();
     const github = githubHealthSnapshot();
     const vercel = vercelHealthSnapshot();
     const aiPlatform = {
@@ -54,6 +57,7 @@ export async function GET() {
         grantDevelopment,
         propertyAssets,
         financeOperations,
+        crm,
       },
       { status },
     );

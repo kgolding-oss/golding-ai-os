@@ -1,0 +1,1 @@
+import type { CrmRelationship } from "./crm-types"; export function searchCrmRelationships(relationships:CrmRelationship[], query:string){ const q=query.toLowerCase(); return relationships.filter((r)=>[r.organization,r.type,r.owner,r.lifecycleStage,r.status,...r.tags].join(" ").toLowerCase().includes(q)); }
