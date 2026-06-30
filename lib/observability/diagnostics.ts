@@ -1,0 +1,5 @@
+import type { DiagnosticsReport, ObservabilityStatus } from "./types";
+import { runRegistryChecks } from "./registry-checks";
+import { runRuntimeChecks } from "./runtime-checks";
+import { runStartupChecks } from "./startup-checks";
+export function runDiagnostics(): DiagnosticsReport { const { aiRuntime } = require("../runtime") as typeof import("../runtime"); const { workflowEngine } = require("../workflows") as typeof import("../workflows"); const { knowledgeRegistry } = require("../knowledge") as typeof import("../knowledge"); const { orchestrator } = require("../orchestration") as typeof import("../orchestration"); const findings = [...runStartupChecks(), ...runRegistryChecks(), ...runRuntimeChecks()]; const status: ObservabilityStatus = findings.some(f=>f.severity === "error") ? "unhealthy" : findings.length ? "degraded" : "healthy"; return { status, findings, counts: { tools: aiRuntime.registry.listTools().length, workflows: workflowEngine.listWorkflows().length, commands: 0, knowledgeProviders: knowledgeRegistry.listProviders().length, orchestrationAgents: orchestrator.discoverAgents().length }, timestamp: new Date().toISOString() }; }

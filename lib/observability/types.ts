@@ -1,0 +1,10 @@
+export type ObservabilityStatus = "healthy" | "degraded" | "unhealthy";
+export type ErrorKind = "recoverable" | "fatal" | "dependency" | "validation" | "policy" | "persistence" | "runtime" | "workflow" | "orchestration" | "knowledge";
+export type LogLevel = "info" | "warn" | "error" | "debug";
+export type CorrelationContext = { correlationId?: string; organizationId?: string | null; userId?: string | null; subsystem?: string };
+export type LogEntry = CorrelationContext & { level: LogLevel; event: string; message?: string; metadata?: Record<string, unknown>; error?: SafeSerializedError; timestamp: string };
+export type SafeSerializedError = { name: string; message: string; kind?: ErrorKind; code?: string; recoverable?: boolean; metadata?: Record<string, unknown> };
+export type SubsystemHealth = { id: string; label: string; status: ObservabilityStatus; message: string; warnings: string[]; errors: string[]; metadata?: Record<string, unknown> };
+export type PlatformHealthReport = { status: ObservabilityStatus; subsystems: SubsystemHealth[]; warnings: string[]; errors: string[]; timestamp: string; version?: string; build?: string };
+export type DiagnosticFinding = { severity: "warning" | "error"; subsystem: string; id: string; message: string };
+export type DiagnosticsReport = { status: ObservabilityStatus; findings: DiagnosticFinding[]; counts: { tools: number; workflows: number; commands: number; knowledgeProviders: number; orchestrationAgents: number }; timestamp: string };
