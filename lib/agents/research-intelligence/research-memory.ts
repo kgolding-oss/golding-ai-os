@@ -1,0 +1,1 @@
+import type { ResearchSnapshot } from "./research-types"; export function researchMemoryMetadata(s:ResearchSnapshot){return{kind:"research-memory",items:s.items.length,sources:s.sources.length,citations:s.citations.length,evidence:s.evidence.length,briefs:s.briefs.length,note:"Metadata only; no embeddings created in this milestone."};}

@@ -1,0 +1,3 @@
+import type { EvidenceRecord } from "./research-types";
+export const demoEvidence:EvidenceRecord[]=[{id:"evidence-policy-doc",researchItemId:"research-immigration-policy",sourceId:"source-uscis-policy",chainOfCustody:{collectedBy:"research-intelligence-agent",collectedAt:"2026-06-30",connector:"knowledge_os",reference:"knowledge-os://policy/uscis-alert"},matterReference:"policy-monitoring",documentCategory:"agency guidance",verificationStatus:"partial",missingEvidence:["Human source verification"],reviewStatus:"needs_review"}];
+export function evidenceReport(evidence=demoEvidence){return{evidence:evidence.length,verified:evidence.filter(e=>e.verificationStatus==="verified").length,missing:evidence.flatMap(e=>e.missingEvidence)}}
