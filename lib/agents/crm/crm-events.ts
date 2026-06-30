@@ -1,0 +1,1 @@
+export const crmEvents = ["crm.contact.registered","crm.organization.registered","crm.follow_up.reminder_generated","crm.pipeline.viewed","crm.score.updated","crm.approval.required","crm.connector.metadata_synced"] as const;

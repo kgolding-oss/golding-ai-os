@@ -1,0 +1,1 @@
+import type { CrmRecommendation } from "./crm-types"; export function crmDelegationsForChiefOfStaff(recommendations:CrmRecommendation[]){ return recommendations.map((r)=>({ id:`cos-crm-${r.id}`, ownerAgent:"crm-relationship-agent", title:r.title, priority:r.severity, approvals:["Approval Engine"], rationale:r.action, status:"pending" as const })); }

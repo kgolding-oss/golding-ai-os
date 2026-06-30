@@ -1,0 +1,12 @@
+export type MediaPlatform = "youtube"|"podcast"|"newsletter"|"blog"|"press_release"|"instagram"|"facebook"|"linkedin"|"x"|"tiktok"|"community"|"brand";
+export type MediaContentType = "video"|"short"|"episode"|"issue"|"article"|"release"|"post"|"asset"|"campaign";
+export type MediaStage = "idea"|"research"|"outline"|"draft"|"review"|"approval pending"|"approved"|"scheduled"|"published"|"archived";
+export type MediaApprovalStatus = "not_required"|"required"|"pending"|"approved"|"rejected";
+export type MediaAsset = { id:string; title:string; type:"logo"|"image"|"thumbnail"|"audio"|"video"|"document"|"template"; provider:"google_drive"|"google_docs"|"knowledge_os"|"supabase"|"manual"; uri:string; approved:boolean; tags:string[]; metadata:Record<string,string>; updatedAt:string };
+export type MediaContentItem = { id:string; title:string; organizationId:string; organization:string; campaignId?:string; campaign:string; platform:MediaPlatform; contentType:MediaContentType; status:MediaStage; owner:string; tags:string[]; publishWindow?:{ start:string; end:string }; approvalStatus:MediaApprovalStatus; assets:MediaAsset[]; transcript?:string; description?:string; analyticsMetadata:Record<string,number|string>; createdAt:string; updatedAt:string };
+export type MediaCampaign = { id:string; organizationId:string; name:string; owner:string; status:"planned"|"active"|"paused"|"complete"|"archived"; objectives:string[]; platforms:MediaPlatform[]; startsAt:string; endsAt:string; contentIds:string[]; tags:string[] };
+export type MediaCalendarEntry = { id:string; contentId:string; title:string; publishAt:string; campaignId?:string; recurring?:"daily"|"weekly"|"monthly"; deadlineAt?:string; milestone:"production"|"review"|"approval"|"publish_window"; owner:string; reminderOnly:true };
+export type MediaTelemetryEvent = { id:string; kind:"campaign"|"content"|"approval"|"asset"|"analytics"|"risk"; at:string; message:string; metadata?:Record<string,unknown> };
+export type MediaRecommendation = { id:string; severity:"critical"|"high"|"medium"|"low"; title:string; action:string; contentId?:string; campaignId?:string };
+export type MediaSnapshot = { campaigns:MediaCampaign[]; content:MediaContentItem[]; calendar:MediaCalendarEntry[]; assets:MediaAsset[]; recommendations:MediaRecommendation[]; telemetry:MediaTelemetrySummary; generatedAt:string };
+export type MediaTelemetrySummary = { campaigns:number; content:number; approvals:number; assets:number; analytics:number; risks:number; recent:MediaTelemetryEvent[] };

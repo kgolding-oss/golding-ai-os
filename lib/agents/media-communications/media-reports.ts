@@ -1,0 +1,1 @@
+import type { MediaSnapshot } from "./media-types"; import { summarizeMediaAnalytics } from "./media-analytics"; export function buildMediaReport(snapshot:MediaSnapshot){ return { generatedAt:snapshot.generatedAt, analytics:summarizeMediaAnalytics(snapshot.content), recommendations:snapshot.recommendations }; }

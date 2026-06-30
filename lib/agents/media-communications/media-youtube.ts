@@ -1,0 +1,1 @@
+import type { MediaContentItem } from "./media-types"; export function youtubeProduction(content:MediaContentItem[]){ return content.filter(c=>c.platform==="youtube").map(c=>({ id:c.id,title:c.title,thumbnails:c.assets.filter(a=>a.type==="thumbnail"),description:c.description,transcript:c.transcript,productionStatus:c.status,uploadDisabled:true })); }
