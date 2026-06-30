@@ -1,0 +1,1 @@
+import type { MediaSnapshot } from "./media-types"; export function mediaRisks(s:MediaSnapshot){ return [ ...s.content.filter(c=>c.approvalStatus==="pending").map(c=>({severity:"high",title:`Approval bottleneck: ${c.title}`})), ...s.content.filter(c=>c.assets.length===0).map(c=>({severity:"medium",title:`Missing assets: ${c.title}`})) ]; }

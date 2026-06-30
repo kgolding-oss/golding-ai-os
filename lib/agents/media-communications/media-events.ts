@@ -1,0 +1,1 @@
+import type { MediaTelemetryEvent } from "./media-types"; export const mediaEvents:MediaTelemetryEvent[]=[]; export function recordMediaEvent(event:Omit<MediaTelemetryEvent,"id"|"at">){ const saved={...event,id:`media-event-${mediaEvents.length+1}`,at:new Date().toISOString()}; mediaEvents.unshift(saved); return saved; }

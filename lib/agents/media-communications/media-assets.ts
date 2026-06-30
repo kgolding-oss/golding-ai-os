@@ -1,0 +1,1 @@
+import type { MediaAsset } from "./media-types"; export function approvedBrandAssets(assets:MediaAsset[]){ return assets.filter(a=>a.approved); } export function missingAssetContent(content:{assets:MediaAsset[];id:string;title:string}[]){ return content.filter(c=>c.assets.length===0).map(c=>({ id:c.id,title:c.title })); }

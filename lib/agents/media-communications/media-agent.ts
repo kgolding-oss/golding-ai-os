@@ -1,0 +1,1 @@
+import { mediaRuntime } from "./media-runtime"; export const mediaCommunicationsAgent={ id:"media-communications-agent", name:"Media & Communications Agent", role:"Coordinates media operations with publishing disabled", run:mediaRuntime.synthesize };

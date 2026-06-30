@@ -1,0 +1,1 @@
+import type { MediaSnapshot } from "./media-types"; const snapshots:MediaSnapshot[]=[]; export const mediaMemory={ save(snapshot:MediaSnapshot){snapshots.unshift(snapshot); return snapshot}, list(){return snapshots}, latest(){return snapshots[0]??null} };

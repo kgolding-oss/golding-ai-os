@@ -1,0 +1,1 @@
+import type { MediaAsset } from "./media-types"; export function buildBrandLibrary(assets:MediaAsset[]){ return { logos:assets.filter(a=>a.type==="logo"), templates:assets.filter(a=>a.type==="template"), approvedMessaging:assets.filter(a=>a.type==="document"&&a.approved), colors:["registry-driven"], fonts:["registry-driven"] }; }
