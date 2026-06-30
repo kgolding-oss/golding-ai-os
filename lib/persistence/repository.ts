@@ -4,7 +4,7 @@ import type { OperatingHistory, PersistenceContext, PersistentRecord } from "./t
 import { hasPersistenceContext, requireOrganizationId } from "./validators";
 import { logger } from "../observability";
 
-export type InsertRecord = Partial<PersistentRecord> & { organization_id?: string | null; payload?: unknown; result?: unknown; error_details?: unknown };
+export type InsertRecord = Partial<PersistentRecord> & { organization_id?: string | null; snapshot_type?: string | null; payload?: unknown; result?: unknown; error_details?: unknown };
 
 export class PersistenceRepository {
   constructor(private readonly token?: string | null) {}

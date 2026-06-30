@@ -1,0 +1,1 @@
+export const CHIEF_OF_STAFF_EVENTS = { briefingGenerated: "chief_of_staff.briefing.generated", delegationQueued: "chief_of_staff.delegation.queued", approvalRequested: "chief_of_staff.approval.requested", followUpGenerated: "chief_of_staff.follow_up.generated" } as const;

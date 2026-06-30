@@ -1,0 +1,1 @@
+export function summarizeChiefOfStaffDashboard(counts: { priorities: number; delegations: number; approvals: number; risks: number; opportunities: number }) { return `Chief of Staff: ${counts.priorities} priorities, ${counts.delegations} delegations, ${counts.approvals} approvals, ${counts.risks} risks, ${counts.opportunities} opportunities.`; }

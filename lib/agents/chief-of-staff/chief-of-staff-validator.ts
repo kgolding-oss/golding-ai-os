@@ -1,0 +1,3 @@
+import type { ChiefOfStaffContext, ChiefOfStaffSnapshot } from "./chief-of-staff-types";
+export function validateChiefOfStaffContext(ctx: ChiefOfStaffContext) { const errors: string[] = []; if (!ctx.dashboard) errors.push("Dashboard data is required."); if (!ctx.executiveIntelligence) errors.push("Executive Intelligence snapshot is required."); if (!ctx.platformHealth) errors.push("Platform health is required."); if (!ctx.knowledgeHealth) errors.push("Knowledge health is required."); return errors; }
+export function validateChiefOfStaffSnapshot(snapshot: ChiefOfStaffSnapshot) { return snapshot.delegationQueue.filter((d) => !d.ownerAgent || !d.rationale || !d.deadline).map((d) => `Invalid delegation ${d.id}.`); }

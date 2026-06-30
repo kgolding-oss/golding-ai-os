@@ -1,0 +1,6 @@
+import type { ExecutiveSeverity } from "../../intelligence";
+import type { ChiefOfStaffAgentOwner, ChiefOfStaffPriority } from "./chief-of-staff-types";
+export function priorityFromSeverity(severity: ExecutiveSeverity): ChiefOfStaffPriority { return severity === "critical" ? "critical" : severity === "high" ? "high" : severity === "medium" ? "medium" : "low"; }
+export function ownerForSubsystem(subsystem: string): ChiefOfStaffAgentOwner { const map: Record<string, ChiefOfStaffAgentOwner> = { runtime: "ai-runtime", knowledge: "knowledge-os", connectors: "connector-runtime", workflows: "workflow-engine", diagnostics: "observability", platform: "observability", persistence: "observability", operations: "workflow-engine", orchestration: "workflow-engine", organization: "human-executive", release: "workflow-engine" }; return map[subsystem] ?? "human-executive"; }
+export function deadlineForPriority(priority: ChiefOfStaffPriority, now = new Date()) { const hours = priority === "critical" ? 4 : priority === "high" ? 24 : priority === "medium" ? 72 : 168; return new Date(now.getTime() + hours * 3600000).toISOString(); }
+export function approvalsFor(owner: ChiefOfStaffAgentOwner, priority: ChiefOfStaffPriority) { return owner === "autonomy-engine" || priority === "critical" ? ["approval-engine"] : []; }
