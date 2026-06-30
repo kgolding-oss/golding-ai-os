@@ -1,0 +1,1 @@
+import type { MediaContentItem } from "./media-types"; export function newsletterStatus(content:MediaContentItem[]){ return content.filter(c=>c.platform==="newsletter").map(c=>({ id:c.id,issue:c.title,audience:c.analyticsMetadata.audience??"registry",draftStatus:c.status,approval:c.approvalStatus,sendDisabled:true })); }

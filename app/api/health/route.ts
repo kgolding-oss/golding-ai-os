@@ -3,6 +3,7 @@ import { getPlatformHealth, logger } from "../../../lib/observability";
 
 export const dynamic = "force-dynamic";
 
+
 export async function GET() {
   try {
     const health = await getPlatformHealth();
@@ -20,6 +21,7 @@ export async function GET() {
     const { propertyHealthSnapshot } = await import("../../../lib/agents/property-assets");
     const { financeOperationsHealthSnapshot } = await import("../../../lib/agents/finance-operations");
     const { crmHealthSnapshot } = await import("../../../lib/agents/crm");
+    const { mediaCommunicationsHealthSnapshot } = await import("../../../lib/agents/media-communications");
     const { githubHealthSnapshot } = await import("../../../lib/connectors/providers/github");
     const { vercelHealthSnapshot } = await import("../../../lib/connectors/providers/vercel");
     const { openAIHealthSnapshot } = await import("../../../lib/connectors/providers/openai");
@@ -32,6 +34,7 @@ export async function GET() {
     const propertyAssets = propertyHealthSnapshot();
     const financeOperations = financeOperationsHealthSnapshot();
     const crm = crmHealthSnapshot();
+    const mediaCommunications = mediaCommunicationsHealthSnapshot();
     const github = githubHealthSnapshot();
     const vercel = vercelHealthSnapshot();
     const aiPlatform = {
@@ -57,7 +60,7 @@ export async function GET() {
         grantDevelopment,
         propertyAssets,
         financeOperations,
-        crm,
+        crm,mediaCommunications,
       },
       { status },
     );

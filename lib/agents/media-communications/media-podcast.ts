@@ -1,0 +1,1 @@
+import type { MediaContentItem } from "./media-types"; export function podcastProduction(content:MediaContentItem[]){ return content.filter(c=>c.platform==="podcast").map(c=>({ id:c.id,episode:c.title,recording:c.assets.find(a=>a.type==="audio"),editing:c.status,schedule:c.publishWindow,publishingDisabled:true })); }

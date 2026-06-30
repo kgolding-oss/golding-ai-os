@@ -1,0 +1,1 @@
+import type { MediaCalendarEntry } from "./media-types"; export function upcomingMediaReminders(calendar:MediaCalendarEntry[], now=new Date()){ return calendar.filter(e=>new Date(e.publishAt)>=now).sort((a,b)=>a.publishAt.localeCompare(b.publishAt)).map(e=>({ ...e, reminderOnly:true as const })); }

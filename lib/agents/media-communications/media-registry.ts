@@ -1,0 +1,6 @@
+import type { MediaContentItem, MediaContentType, MediaPlatform, MediaStage } from "./media-types";
+export const mediaPlatforms: MediaPlatform[] = ["youtube","podcast","newsletter","blog","press_release","instagram","facebook","linkedin","x","tiktok","community","brand"];
+export const mediaContentTypes: MediaContentType[] = ["video","short","episode","issue","article","release","post","asset","campaign"];
+export const mediaPipelineStages: MediaStage[] = ["idea","research","outline","draft","review","approval pending","approved","scheduled","published","archived"];
+export function isRegisteredMediaPlatform(value:string): value is MediaPlatform { return mediaPlatforms.includes(value as MediaPlatform); }
+export function summarizeContentRegistry(content:MediaContentItem[]){ return { total:content.length, byPlatform:Object.fromEntries(mediaPlatforms.map(p=>[p,content.filter(c=>c.platform===p).length])), byStage:Object.fromEntries(mediaPipelineStages.map(s=>[s,content.filter(c=>c.status===s).length])), approvalQueue:content.filter(c=>c.approvalStatus==="pending"||c.status==="approval pending") }; }
