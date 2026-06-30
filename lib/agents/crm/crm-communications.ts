@@ -1,0 +1,1 @@
+export const crmCommunicationPolicy = { automaticSending:false, allowedAiUses:["summaries","classification","duplicate_detection","contact_normalization","issue_extraction","communication_summaries"], connectors:["gmail","google_calendar","google_drive","google_docs"], metadataOnly:true };

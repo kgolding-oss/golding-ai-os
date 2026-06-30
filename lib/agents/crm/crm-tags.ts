@@ -1,0 +1,1 @@
+import type { CrmRelationship } from "./crm-types"; export const relationshipsByTag=(relationships:CrmRelationship[], tag:string)=>relationships.filter((r)=>r.tags.includes(tag)); export const crmTags=(relationships:CrmRelationship[])=>[...new Set(relationships.flatMap((r)=>r.tags))].sort();
