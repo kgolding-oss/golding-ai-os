@@ -1,0 +1,13 @@
+export type AiModality = "text"|"image"|"audio"|"video"|"embedding";
+export type AiSafetyClassification = "standard"|"sensitive"|"restricted";
+export type AiLifecycleState = "draft"|"pending_approval"|"approved"|"active"|"deprecated"|"archived";
+export type ModelCostMetadata={inputTokenUsd:number;outputTokenUsd:number;currency:"USD";unit:"1K_TOKENS"|"1M_TOKENS"};
+export type ModelRateLimits={requestsPerMinute?:number;tokensPerMinute?:number;concurrentSessions?:number};
+export type ModelCapabilities={reasoning:boolean;structuredOutput:boolean;streaming:boolean;tools:boolean;image:boolean;vision:boolean;embedding:boolean;modalities:AiModality[]};
+export type ModelDefinition={id:string;provider:string;family:string;version:string;contextWindow:number;capabilities:ModelCapabilities;cost:ModelCostMetadata;rateLimits:ModelRateLimits;safety:AiSafetyClassification;status?:AiLifecycleState;metadata?:Record<string,unknown>};
+export type AiExecutionRequest={organizationId?:string|null;userId?:string|null;workflowId?:string;promptId?:string;modelId?:string;input:string;tools?:string[];estimatedInputTokens?:number;requiresAutonomy?:boolean;metadata?:Record<string,unknown>};
+export type AiExecutionResult={sessionId:string;modelId:string;provider:string;output:string;tokens:{input:number;output:number;total:number};costUsd:number;latencyMs:number;metadata:Record<string,unknown>};
+export type PromptDefinition={id:string;ownerId:string;organizationId?:string|null;name:string;version:number;template:string;variables:string[];status:AiLifecycleState;approvedBy?:string;createdAt:string;metadata?:Record<string,unknown>};
+export type ToolDefinition={id:string;provider:string;name:string;capabilities:string[];permissions:string[];requiresApproval:boolean;destructive:boolean;metadata?:Record<string,unknown>};
+export type McpServerDefinition={id:string;name:string;endpoint:string;organizationId?:string|null;capabilities:string[];status:"registered"|"healthy"|"degraded"|"unhealthy";metadata?:Record<string,unknown>};
+export type AiTelemetryEvent={type:string;id:string;organizationId?:string|null;modelId?:string;toolId?:string;promptId?:string;latencyMs?:number;tokens?:number;costUsd?:number;message:string;createdAt:string;metadata?:Record<string,unknown>};

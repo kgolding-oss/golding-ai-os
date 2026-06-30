@@ -1,0 +1,2 @@
+export function extractVariables(template:string){const variables:string[]=[]; const pattern=/{{\s*([a-zA-Z0-9_.-]+)\s*}}/g; let match:RegExpExecArray|null; while((match=pattern.exec(template))!==null) variables.push(match[1]); return variables;}
+export function renderPrompt(template:string,context:Record<string,unknown>){return template.replace(/{{\s*([a-zA-Z0-9_.-]+)\s*}}/g,(_,k)=>String(context[k]??""));}

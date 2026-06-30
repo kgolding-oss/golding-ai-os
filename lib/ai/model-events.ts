@@ -1,0 +1,1 @@
+import type { AiTelemetryEvent } from "./model-types"; const events:AiTelemetryEvent[]=[]; export function emitModelEvent(event:Omit<AiTelemetryEvent,"id"|"createdAt">){const record={...event,id:`ai_evt_${events.length+1}`,createdAt:new Date().toISOString()}; events.unshift(record); return record;} export function listModelEvents(){return events.slice(0,100);}

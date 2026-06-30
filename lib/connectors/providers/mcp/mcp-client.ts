@@ -1,0 +1,1 @@
+export class McpClient{constructor(public serverId:string){} async negotiate(){return {serverId:this.serverId,capabilities:["tools","sessions","health"]};} async executeTool(toolId:string,input:unknown){return {toolId,input,success:false,message:"Live MCP execution requires server transport configuration."};}}

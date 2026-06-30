@@ -1,0 +1,1 @@
+import type { McpServerDefinition, ToolDefinition } from "../../../ai"; export type McpServer=McpServerDefinition; export type McpTool=ToolDefinition&{serverId:string}; export type McpSession={id:string;serverId:string;status:"active"|"completed"|"failed";createdAt:string;metadata?:Record<string,unknown>};

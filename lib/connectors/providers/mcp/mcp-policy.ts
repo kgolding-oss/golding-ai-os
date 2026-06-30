@@ -1,0 +1,1 @@
+import type { McpTool } from "./mcp-types"; export function evaluateMcpPolicy(tool:McpTool){return {allowed:!tool.requiresApproval&&!tool.destructive,requiresApproval:tool.requiresApproval||tool.destructive,reasons:[tool.destructive&&"destructive tool operation",tool.requiresApproval&&"external MCP tool execution"].filter(Boolean) as string[]};}

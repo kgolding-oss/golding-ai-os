@@ -12,4 +12,4 @@ const mocks = [
 if (!connectorRegistry.getConnector(githubConnector.id)) connectorRegistry.registerConnector(githubConnector);
 if (!connectorRegistry.getConnector(vercelConnector.id)) connectorRegistry.registerConnector(vercelConnector);
 for (const connector of mocks) if (!connectorRegistry.getConnector(connector.id)) connectorRegistry.registerConnector(connector);
-export * from "./providers/github"; export * from "./providers/vercel";
+export * from "./providers/github"; export * from "./providers/vercel"; export * from "./providers/openai"; export * from "./providers/mcp";

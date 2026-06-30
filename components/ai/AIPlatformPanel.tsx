@@ -1,0 +1,9 @@
+import type { ModelDefinition, PromptDefinition, ToolDefinition } from "../../lib/ai";
+import type { McpServer } from "../../lib/connectors/providers/mcp";
+
+type Props={models:ModelDefinition[];prompts:PromptDefinition[];tools:ToolDefinition[];mcpServers:McpServer[];sessions:{active:number;completed:number;failures:number};costs:{tokens:number;costUsd:number;latencyMs:number}};
+export function AIPlatformPanel({models,prompts,tools,mcpServers,sessions,costs}:Props){
+  const activeModels=models.filter((m)=>m.status!=="archived").length;
+  const approvedPrompts=prompts.filter((p)=>p.status==="approved"||p.status==="active").length;
+  return <section className="card"><div className="sectionHeader"><div><p className="eyebrow">AI Platform</p><h2>OpenAI Runtime & MCP Platform</h2></div><span className="statusPill">Registry driven</span></div><div className="grid threeColumn"><div><h3>Models</h3><p>{models.length} registered / {activeModels} active</p><ul>{models.slice(0,4).map((m)=><li key={m.id}>{m.id}: {m.capabilities.modalities.join(", ")}</li>)}</ul></div><div><h3>Prompts</h3><p>{prompts.length} versions / {approvedPrompts} approved</p><ul>{prompts.slice(0,4).map((p)=><li key={`${p.id}-${p.version}`}>{p.name} v{p.version}: {p.status}</li>)}</ul></div><div><h3>Tools</h3><p>{tools.length} registered</p><ul>{tools.slice(0,5).map((t)=><li key={t.id}>{t.provider}: {t.requiresApproval?"approval":"readiness"}</li>)}</ul></div><div><h3>MCP</h3><p>{mcpServers.length} servers</p><ul>{mcpServers.length?mcpServers.map((s)=><li key={s.id}>{s.name}: {s.status}</li>):<li>No MCP servers registered yet.</li>}</ul></div><div><h3>Sessions</h3><p>{sessions.active} active / {sessions.completed} completed / {sessions.failures} failures</p></div><div><h3>Costs</h3><p>{costs.tokens} tokens / ${costs.costUsd.toFixed(6)} estimated</p><p>{costs.latencyMs}ms cumulative latency</p></div></div></section>;
+}

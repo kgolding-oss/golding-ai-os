@@ -1,0 +1,1 @@
+import type { McpTool } from "./mcp-types"; const tools=new Map<string,McpTool>(); export const mcpTools={register(tool:McpTool){tools.set(tool.id,tool);return tool;},list(serverId?:string){return Array.from(tools.values()).filter(t=>!serverId||t.serverId===serverId)},get(id:string){return tools.get(id)}};

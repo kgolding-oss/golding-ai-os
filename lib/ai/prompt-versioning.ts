@@ -1,0 +1,1 @@
+import type { PromptDefinition } from "./model-types"; export function nextPromptVersion(prior?:PromptDefinition){return (prior?.version??0)+1;} export function rollbackPrompt(versions:PromptDefinition[],version:number){return versions.find(p=>p.version===version);}

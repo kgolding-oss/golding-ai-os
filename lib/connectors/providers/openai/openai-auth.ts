@@ -1,0 +1,1 @@
+import type { OpenAIConnectorConfig } from "./openai-types"; export function resolveOpenAIAuth(config:OpenAIConnectorConfig={}){return {configured:Boolean(config.apiKey||process.env.OPENAI_API_KEY),projectId:config.projectId??process.env.OPENAI_PROJECT_ID,organizationId:config.organizationId??process.env.OPENAI_ORG_ID};}

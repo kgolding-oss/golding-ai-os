@@ -1,0 +1,1 @@
+const memory=new Map<string,string[]>(); export function appendConversation(sessionId:string,message:string){const list=memory.get(sessionId)??[]; list.push(message); memory.set(sessionId,list); return list;} export function getConversation(sessionId:string){return memory.get(sessionId)??[];}

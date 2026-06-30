@@ -1,0 +1,1 @@
+const events:any[]=[]; export function emitMcpEvent(event:any){const record={...event,id:`mcp_evt_${events.length+1}`,createdAt:new Date().toISOString()}; events.unshift(record); return record;} export function listMcpEvents(){return events;}
