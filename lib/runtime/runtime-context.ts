@@ -1,0 +1,2 @@
+import type { RuntimeExecutionContext } from "./runtime-types";
+export function createRuntimeContext(input: Partial<RuntimeExecutionContext> = {}): RuntimeExecutionContext { return { organizationId: input.organizationId ?? null, workflowId: input.workflowId ?? null, agentId: input.agentId ?? "runtime", userId: input.userId ?? null, permissions: input.permissions ?? [], now: input.now ?? new Date().toISOString(), memoryContext: input.memoryContext ?? {}, executionContext: input.executionContext ?? {}, accessToken: input.accessToken ?? null }; }

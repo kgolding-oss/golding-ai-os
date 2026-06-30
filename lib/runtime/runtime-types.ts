@@ -1,0 +1,17 @@
+export type RuntimeHealth = "healthy" | "degraded" | "unhealthy";
+export type RuntimeSecurityClassification = "public" | "internal" | "confidential" | "restricted";
+export type RuntimeToolCategory = "utility" | "organization" | "workflow" | "knowledge" | "runtime";
+export type JsonSchema = { type: string; properties?: Record<string, JsonSchema>; required?: string[]; items?: JsonSchema; additionalProperties?: boolean; enum?: string[] };
+export type RuntimeRetryPolicy = { maxRetries: number; backoffMs: number };
+export type RuntimeToolScope = "global" | "organization";
+export type RuntimeToolDefinition<I = unknown, O = unknown> = { id: string; name: string; description: string; category: RuntimeToolCategory; version: string; organizationScope: RuntimeToolScope; requiredPermissions: string[]; inputSchema: JsonSchema; outputSchema: JsonSchema; deterministic: boolean; supportsStreaming: boolean; supportsAsync: boolean; health: RuntimeHealth; timeoutMs: number; retryPolicy: RuntimeRetryPolicy; securityClassification: RuntimeSecurityClassification; execute(input: I, context: RuntimeExecutionContext): Promise<O> | O };
+export type RuntimeExecutionContext = { organizationId?: string | null; workflowId?: string | null; agentId?: string | null; userId?: string | null; permissions: string[]; now: string; memoryContext?: Record<string, unknown>; executionContext?: Record<string, unknown>; accessToken?: string | null };
+export type RuntimePolicy = { allowedTools?: string[]; deniedTools?: string[]; maxExecutions?: number; maxTimeoutMs?: number; maxRetries?: number; maxSecurityClassification?: RuntimeSecurityClassification; requireDeterministic?: boolean };
+export type RuntimeEventType = "session.started" | "tool.requested" | "tool.validated" | "tool.executed" | "tool.failed" | "tool.completed" | "policy.denied" | "runtime.completed";
+export type RuntimeEvent = { id: string; type: RuntimeEventType; sessionId: string; toolId?: string; organizationId?: string | null; agentId?: string | null; workflowId?: string | null; timestamp: string; message: string; payload?: Record<string, unknown> };
+export type RuntimeErrorRecord = { code: string; message: string; toolId?: string; timestamp: string; details?: Record<string, unknown> };
+export type RuntimeToolResult<T = unknown> = { toolId: string; success: boolean; output?: T; error?: RuntimeErrorRecord; durationMs: number; attempts: number };
+export type RuntimeSession = { id: string; organizationId?: string | null; workflowId?: string | null; agentId?: string | null; userId?: string | null; context: RuntimeExecutionContext; memoryContext?: Record<string, unknown>; permissions: string[]; toolsUsed: string[]; timeline: RuntimeEvent[]; events: RuntimeEvent[]; errors: RuntimeErrorRecord[]; startedAt: string; completedAt?: string; durationMs?: number; result?: RuntimeResult };
+export type RuntimeResult = { sessionId: string; success: boolean; toolResults: RuntimeToolResult[]; errors: RuntimeErrorRecord[]; durationMs: number };
+export type RuntimeMetrics = { executions: number; failures: number; averageDurationMs: number; toolUsage: Record<string, number>; organizationUsage: Record<string, number>; successRate: number; retryCount: number; policyViolations: number; runtimeHealth: RuntimeHealth };
+export type RuntimeValidationResult = { valid: boolean; errors: string[] };
