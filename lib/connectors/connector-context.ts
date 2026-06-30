@@ -1,0 +1,2 @@
+import type { ConnectorExecutionContext } from "./connector-types";
+export function createConnectorContext(input: Partial<ConnectorExecutionContext> = {}): ConnectorExecutionContext { return { correlationId: input.correlationId ?? `connector-${Date.now()}`, permissions: input.permissions ?? [], now: input.now ?? new Date().toISOString(), organizationId: input.organizationId ?? null, userId: input.userId ?? null, workflowId: input.workflowId ?? null, agentId: input.agentId ?? null, runtimeSessionId: input.runtimeSessionId ?? null, metadata: input.metadata ?? {} }; }
