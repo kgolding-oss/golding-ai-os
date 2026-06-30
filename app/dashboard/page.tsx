@@ -17,6 +17,7 @@ import { RecentActivity } from "../../components/dashboard/RecentActivity";
 import { RecommendationPanel } from "../../components/dashboard/RecommendationPanel";
 import { SystemHealth } from "../../components/dashboard/SystemHealth";
 import { DiagnosticsPanel } from "../../components/dashboard/DiagnosticsPanel";
+import { ExecutiveIntelligenceDashboard } from "../../components/intelligence/ExecutiveIntelligenceDashboard";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
@@ -28,6 +29,7 @@ import { getOperatingHistory } from "../../lib/persistence";
 import { aiRuntime } from "../../lib/runtime";
 import { connectorManager } from "../../lib/connectors";
 import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observability";
+import { executiveIntelligenceEngine } from "../../lib/intelligence";
 
 async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
   try { return { health: await getPlatformHealth({ token, organizationId }), diagnostics: runDiagnostics() }; }
@@ -57,6 +59,7 @@ export default async function DashboardPage() {
   const connectors = connectorManager.list();
   const connectorSessions = connectorManager.runtime.sessions.filter((connectorSession) => !activeOrganizationRecord?.id || connectorSession.context.organizationId === activeOrganizationRecord.id);
   const connectorDiagnostics = connectorManager.diagnostics();
+  const executiveSnapshot = executiveIntelligenceEngine.analyze({ organization: activeOrganizationRecord, dashboard: data, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory });
 
   return (
     <main className="shell executiveShell">
@@ -80,6 +83,7 @@ export default async function DashboardPage() {
       <AIRuntimePanel tools={runtimeTools} sessions={runtimeSessions} metrics={runtimeMetrics} />
       <EnterpriseConnectorsPanel connectors={connectors} sessions={connectorSessions} diagnostics={connectorDiagnostics} />
       <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
+      <ExecutiveIntelligenceDashboard snapshot={executiveSnapshot} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">

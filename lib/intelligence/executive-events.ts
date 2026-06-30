@@ -1,0 +1,3 @@
+import type { ExecutiveSignal, ExecutiveTimelineEvent, ExecutiveSnapshot } from "./executive-types";
+export function signalToTimeline(signal:ExecutiveSignal):ExecutiveTimelineEvent{return {id:`timeline-${signal.id}`,at:signal.createdAt,severity:signal.severity,subsystem:signal.subsystem,title:signal.title,detail:signal.rationale};}
+export function buildExecutiveTimeline(snapshot:Omit<ExecutiveSnapshot,"timeline">):ExecutiveTimelineEvent[]{return [...snapshot.priorities,...snapshot.risks,...snapshot.opportunities,...snapshot.bottlenecks,...snapshot.recommendations].map(signalToTimeline).sort((a,b)=>a.severity.localeCompare(b.severity)).slice(0,16);}

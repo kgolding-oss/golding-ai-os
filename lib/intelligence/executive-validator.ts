@@ -1,0 +1,2 @@
+import type { ExecutiveAnalysisContext } from "./executive-types";
+export function validateExecutiveContext(ctx:ExecutiveAnalysisContext):string[]{const e:string[]=[]; if(!ctx.dashboard) e.push("Dashboard data is required."); if(!ctx.platformHealth) e.push("Platform health is required."); if(!ctx.diagnostics) e.push("Diagnostics are required."); if(!ctx.knowledgeHealth) e.push("Knowledge health is required."); return e;}

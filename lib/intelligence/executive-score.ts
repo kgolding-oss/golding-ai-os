@@ -1,0 +1,17 @@
+import type { ExecutiveAnalysisContext, ExecutiveCategoryScore, ExecutiveHealthScore } from "./executive-types";
+const clamp=(n:number)=>Math.max(0,Math.min(100,Math.round(n)));
+const cat=(category: ExecutiveCategoryScore["category"], score:number, explanation:string, evidence:string[], confidence=0.86):ExecutiveCategoryScore=>({category,score:clamp(score),confidence,explanation,evidence});
+export function computeExecutiveScore(ctx: ExecutiveAnalysisContext): ExecutiveHealthScore {
+ const failed=ctx.operatingHistory.failedEvents.length, open=ctx.dashboard.tasks.filter(t=>!["done","completed","cancelled","archived"].includes(String(t.status).toLowerCase())).length;
+ const unhealthyServices=ctx.dashboard.health.filter(h=>/unhealthy|degraded|offline|error|failed/i.test(`${h.health} ${h.connection_status}`)).length;
+ const platform=cat("platform", ctx.platformHealth.status==="healthy"?94:ctx.platformHealth.status==="degraded"?72:42, `Platform health is ${ctx.platformHealth.status}.`, ctx.platformHealth.subsystems.map(s=>`${s.label}: ${s.status}`));
+ const operations=cat("operations", 90-Math.min(45,failed*9)-Math.min(20,open), `${failed} failed persistent events and ${open} open tasks influence operations.`, [`failed events: ${failed}`, `open tasks: ${open}`]);
+ const knowledge=cat("knowledge", ctx.knowledgeHealth.readinessScore, `Knowledge readiness is ${ctx.knowledgeHealth.readinessScore}%.`, [`indexed documents: ${ctx.knowledgeHealth.indexedDocuments}`, `cache: ${ctx.knowledgeHealth.cacheHealth}`]);
+ const runtime=cat("runtime", ctx.runtimeMetrics.runtimeHealth==="healthy"?94:ctx.runtimeMetrics.runtimeHealth==="degraded"?70:45, `Runtime is ${ctx.runtimeMetrics.runtimeHealth} with ${ctx.runtimeMetrics.successRate}% success.`, [`tools: ${ctx.runtimeTools.length}`, `policy violations: ${ctx.runtimeMetrics.policyViolations}`]);
+ const badConnectors=ctx.connectors.filter(c=>c.health.status!=="healthy").length; const connectors=cat("connectors", 92-Math.min(55,badConnectors*18), `${badConnectors} connector(s) are not healthy.`, [`connectors: ${ctx.connectors.length}`, `sessions: ${ctx.connectorSessions.length}`]);
+ const unhealthyWf=ctx.workflows.filter(w=>w.status!=="ready").length; const workflows=cat("workflows", ctx.workflows.length?88-Math.min(40,unhealthyWf*12):58, ctx.workflows.length?`${ctx.workflows.length} workflow(s) registered.`:"No workflows are registered.", [`inactive workflows: ${unhealthyWf}`]);
+ const org=cat("organizationReadiness", ctx.organization? (ctx.dashboard.memberships.length>1?88:74):40, ctx.organization?"Active organization context is available.":"No active organization context is available.", [`memberships: ${ctx.dashboard.memberships.length}`]);
+ const ai=cat("aiReadiness", 82-Math.min(25,unhealthyServices*5), "AI readiness combines agents, runtime, knowledge, and connectors.", [`agents: ${ctx.dashboard.agents.length}`, `unhealthy services: ${unhealthyServices}`]);
+ const categories=[platform,operations,knowledge,runtime,connectors,workflows,org,ai]; const overall=clamp(categories.reduce((s,c)=>s+c.score,0)/categories.length);
+ return { overall, confidence:Number((categories.reduce((s,c)=>s+c.confidence,0)/categories.length).toFixed(2)), categories, explanation:`Executive health is ${overall}/100 across deterministic platform, operations, knowledge, runtime, connector, workflow, organization, and AI readiness signals.`, calculatedAt:(ctx.now??new Date()).toISOString() };
+}

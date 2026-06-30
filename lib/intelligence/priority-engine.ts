@@ -1,0 +1,3 @@
+import type { ExecutivePriority, ExecutiveRecommendation, ExecutiveRisk, ExecutiveBottleneck } from "./executive-types";
+const weight={critical:4,high:3,medium:2,low:1,info:0};
+export function rankPriorities(input:{recommendations:ExecutiveRecommendation[];risks:ExecutiveRisk[];bottlenecks:ExecutiveBottleneck[]}):ExecutivePriority[]{return [...input.risks,...input.bottlenecks,...input.recommendations].sort((a,b)=>weight[b.severity]-weight[a.severity]).slice(0,7).map((s,i)=>({id:`priority-${s.id}`,kind:"priority",rank:i+1,severity:s.severity,subsystem:s.subsystem,title:s.title,rationale:s.rationale,evidence:s.evidence,confidence:s.confidence,createdAt:s.createdAt,recommendedNextStep:"mitigation" in s?s.mitigation:"reliefAction" in s?s.reliefAction:s.suggestedAction}));}
