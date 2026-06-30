@@ -1,3 +1,4 @@
+import { AIWorkforcePanel } from "../../components/dashboard/AIWorkforcePanel";
 import { AgentStatusPanel } from "../../components/dashboard/AgentStatusPanel";
 import { AttentionQueue } from "../../components/dashboard/AttentionQueue";
 import { CommandBar } from "../../components/dashboard/CommandBar";
@@ -17,6 +18,7 @@ import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/i
 import { buildMetrics } from "../../lib/dashboard/metrics";
 import { getDashboardData } from "../../lib/dashboard/queries";
 import { buildKnowledgeHealthReport, knowledgeRegistry } from "../../lib/knowledge";
+import { AgentOrchestrator } from "../../lib/orchestration";
 import { workflowEngine } from "../../lib/workflows";
 
 export default async function DashboardPage() {
@@ -29,6 +31,7 @@ export default async function DashboardPage() {
   const recommendations = buildRecommendations({ ...data, organization: activeOrganizationRecord, membershipCount: data.memberships.length });
   const knowledgeHealth = buildKnowledgeHealthReport(knowledgeRegistry);
   const workflows = workflowEngine.listWorkflows();
+  const agentOrchestrator = AgentOrchestrator.fromDashboardAgents(data.agents);
 
   return (
     <main className="shell executiveShell">
@@ -42,9 +45,12 @@ export default async function DashboardPage() {
       </section>
       <section className="grid twoColumn">
         <AgentStatusPanel agents={data.agents} activity={data.activity} />
-        <SystemHealth health={data.health} />
+        <AIWorkforcePanel orchestrator={agentOrchestrator} />
       </section>
-      <ExecutiveWorkflowPanel workflows={workflows} />
+      <section className="grid twoColumn">
+        <SystemHealth health={data.health} />
+        <ExecutiveWorkflowPanel workflows={workflows} />
+      </section>
       <KnowledgeDashboard health={knowledgeHealth} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">
