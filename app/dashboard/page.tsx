@@ -25,6 +25,7 @@ import { MediaCommunicationsPanel } from "../../components/media-communications/
 import { CrmRelationshipPanel } from "../../components/crm/CrmRelationshipPanel";
 import { FinanceOperationsPanel } from "../../components/finance-operations/FinanceOperationsPanel";
 import { LawLibraryFundingPanel } from "../../components/law-library-funding/LawLibraryFundingPanel";
+import { LawLibraryOSPanel } from "../../components/law-library-os/LawLibraryOSPanel";
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
@@ -131,6 +132,7 @@ const crmSnapshot = crmRuntime.synthesize({
 <MediaCommunicationsPanel snapshot={mediaSnapshot} />
 <FinanceOperationsPanel snapshot={financeSnapshot} />
 <LawLibraryFundingPanel snapshot={lawLibraryFundingSnapshot} />
+<LawLibraryOSPanel />
       <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />

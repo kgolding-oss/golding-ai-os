@@ -241,3 +241,11 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .status.degraded { color: #f59e0b; }
 .status.unhealthy { color: #ef4444; }
 .status.healthy { color: #22c55e; }
+
+.stack { display: grid; gap: 18px; }
+.metricGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.metricGrid > div, .subpanel { border: 1px solid var(--line); border-radius: 20px; padding: 16px; background: rgba(255,255,255,0.035); }
+.metricGrid strong { display: block; color: var(--gold); font-size: 1.8rem; }
+.metricGrid span, .muted { color: var(--muted); }
+.subpanel p, .subpanel li { color: var(--muted); line-height: 1.55; }
+@media (max-width: 920px) { .metricGrid { grid-template-columns: 1fr 1fr; } }

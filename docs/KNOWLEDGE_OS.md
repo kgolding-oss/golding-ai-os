@@ -82,3 +82,7 @@ Vector search should be added as another search provider capability. Public sear
 ## Future RAG integration
 
 RAG agents should call the registry search interface, receive structured results, cite memory ids/source identifiers, and never bypass organization or permission filtering. Agent-specific memory can be registered as another memory provider while sharing the same indexing, health, and search contracts.
+
+## Milestone 10 production activation
+
+Knowledge Operations indexes Google Drive, internal SOPs, grant templates, immigration templates, FOIA templates, habeas templates, board documents, research, media, property documents, and policies. Production agents should retrieve relevant knowledge sources before generating drafts and should include citation context for human review.
