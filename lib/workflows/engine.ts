@@ -1,7 +1,7 @@
 import { WorkflowExecutor } from "./executor";
 import { WorkflowRegistry } from "./registry";
 import { WorkflowStateStore } from "./state";
-import { ExecutiveDailyBriefWorkflow, KnowledgeDiscoveryWorkflow, ReleaseVerificationWorkflow } from "./workflows";
+import { ExecutiveDailyBriefWorkflow, KnowledgeDiscoveryWorkflow, ReleaseVerificationWorkflow, createEnterpriseWorkflows } from "./workflows";
 import type { WorkflowContext } from "./types";
 
 export class WorkflowEngine {
@@ -17,6 +17,7 @@ export function createWorkflowEngine() {
     .register(new ExecutiveDailyBriefWorkflow())
     .register(new ReleaseVerificationWorkflow())
     .register(new KnowledgeDiscoveryWorkflow());
+  createEnterpriseWorkflows().forEach((workflow) => registry.register(workflow));
   return new WorkflowEngine(registry, state, new WorkflowExecutor(state));
 }
 

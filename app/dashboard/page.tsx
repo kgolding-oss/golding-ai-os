@@ -6,6 +6,7 @@ import { DashboardHeader } from "../../components/dashboard/DashboardHeader";
 import { ExecutiveCommandCenter } from "../../components/dashboard/ExecutiveCommandCenter";
 import { ExecutiveBrief } from "../../components/dashboard/ExecutiveBrief";
 import { ExecutiveWorkflowPanel } from "../../components/dashboard/ExecutiveWorkflowPanel";
+import { EnterpriseOperationsPanel } from "../../components/dashboard/EnterpriseOperationsPanel";
 import { MetricsGrid } from "../../components/dashboard/MetricsGrid";
 import { KnowledgeDashboard } from "../../components/knowledge/KnowledgeDashboard";
 import { AIRuntimePanel } from "../../components/runtime/AIRuntimePanel";
@@ -111,6 +112,7 @@ const crmSnapshot = crmRuntime.synthesize({
       <CommandBar />
       <MetricsGrid metrics={metrics} />
       <ExecutiveCommandCenter tasks={data.tasks} approvals={data.approvals} agents={data.agents} health={data.health} projects={data.projects} activity={data.activity} production={productionData} />
+      <EnterpriseOperationsPanel dashboard={data} production={productionData} organization={activeOrganizationRecord} />
       <section className="grid twoColumn">
         <ExecutiveBrief organization={activeOrganizationRecord} tasks={data.tasks} approvals={data.approvals} agents={data.agents} health={data.health} projects={data.projects} activity={data.activity} auditLogs={data.auditLogs} membershipCount={data.memberships.length} />
         <AttentionQueue items={attentionItems} />
