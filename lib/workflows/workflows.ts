@@ -37,6 +37,7 @@ export class KnowledgeDiscoveryWorkflow implements Workflow<unknown, { providers
 
 
 const enterpriseWorkflowDefinitions = [
+  { id: "legal-operations-intake", name: "Legal Operations Intake", handoff: "Intake → Legal Triage → Research → Human Approval" },
   { id: "grant-lifecycle", name: "Grant Lifecycle", handoff: "Research → Grant Writing → Funding → Finance" },
   { id: "sponsor-lifecycle", name: "Sponsor Lifecycle", handoff: "CRM → Funding → Finance" },
   { id: "case-lifecycle", name: "Case Lifecycle", handoff: "Research → Legal → Knowledge" },
@@ -44,6 +45,8 @@ const enterpriseWorkflowDefinitions = [
   { id: "board-meetings", name: "Board Meetings", handoff: "Chief of Staff → Executive Intelligence → Finance" },
   { id: "project-approvals", name: "Project Approvals", handoff: "Operations → Finance → Executive Approval" },
   { id: "media-production", name: "Media Production", handoff: "Media → Education → Legal" },
+  { id: "partnership-activation", name: "Partnership Activation", handoff: "CRM → Partnerships → Executive Approval" },
+  { id: "funding-readiness", name: "Funding Readiness", handoff: "Funding → Finance → Board Reporting" },
   { id: "course-publishing", name: "Course Publishing", handoff: "Education → Media → Knowledge" },
 ];
 

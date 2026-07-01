@@ -1,0 +1,32 @@
+import { orchestrateIndexing } from "../indexing/pipeline";
+import { createMemoryObject, memoryToDocument } from "../memory/model";
+import { searchMemoryObjects } from "../search/engine";
+import type { KnowledgeProvider } from "../provider";
+import type { IndexingJob, KnowledgeDocument, KnowledgeIndexRequest, KnowledgeProviderMetadata, KnowledgeProviderResponse, KnowledgeSearchQuery, KnowledgeSearchResult, MemoryObject } from "../types";
+
+const now = "2026-07-01T00:00:00.000Z";
+
+const baseMemory = [
+  { id: "ll-mission-control", organizationId: "law-library", sourceIdentifier: "operations/mission-control", title: "Law Library Mission Control", content: "Operational priorities: client intake, immigration case triage, education programs, community clinics, partner referrals, funding deadlines, and media approvals. External filings, donor outreach, publishing, payments, and legal recommendations require human approval and audit logging.", summary: "Daily Law Library operating priorities and approval boundaries.", labels: ["mission-control"], tags: ["legal-operations", "approvals", "law-library"], owner: "chief-of-staff-agent" },
+  { id: "exec-operating-center", organizationId: "law-library", sourceIdentifier: "operations/executive-center", title: "Executive Operating Center", content: "Karim Golding's executive dashboard tracks priorities, approvals, agent health, queue depth, connector status, workflow duration, organization isolation, and cross-department execution for The Law Library and related ventures.", summary: "Executive operating center metrics and daily cadence.", labels: ["executive"], tags: ["kpi", "queue-depth", "agent-health"], owner: "executive-command-agent" },
+  { id: "workflow-template-catalog", organizationId: "law-library", sourceIdentifier: "operations/workflow-templates", title: "Reusable Workflow Template Catalog", content: "Templates cover legal operations, funding, education, partnerships, media, finance approvals, and board reporting. Every template includes deterministic steps, owner handoffs, queue metrics, audit events, and approval gates before external or high-risk actions.", summary: "Workflow template operating rules.", labels: ["workflow"], tags: ["templates", "funding", "media", "education"], owner: "workflow-engine" },
+];
+
+function makeMemory(input: (typeof baseMemory)[number]): MemoryObject {
+  return createMemoryObject({ ...input, sourceProvider: "operational-knowledge", metadata: { repository: "production-seed", organizationSlug: input.organizationId }, permissions: [{ subjectType: "organization", subjectId: input.organizationId, actions: ["read", "index"] }], created: now, updated: now, version: 1, status: "indexed" });
+}
+
+export class OperationalKnowledgeProvider implements KnowledgeProvider {
+  private memory = baseMemory.map(makeMemory);
+  private jobs = this.memory.map((item) => orchestrateIndexing(item, now));
+  readonly metadata: KnowledgeProviderMetadata = { id: "operational-knowledge", name: "Operational Knowledge Repository", description: "Organization-scoped seed memory for executive, Law Library, workflow, and KPI operations.", status: "available", indexedDocumentCount: this.memory.length, lastSyncAt: now, searchable: true };
+  async listDocuments(): Promise<KnowledgeProviderResponse<KnowledgeDocument[]>> { return { ok: true, data: this.memory.map(memoryToDocument), message: "Production operational knowledge documents." }; }
+  async getDocument(documentId: string): Promise<KnowledgeProviderResponse<KnowledgeDocument | null>> { const memory = this.memory.find((item) => item.id === documentId); return { ok: Boolean(memory), data: memory ? memoryToDocument(memory) : null }; }
+  async search(query: KnowledgeSearchQuery): Promise<KnowledgeProviderResponse<KnowledgeSearchResult[]>> { return { ok: true, data: searchMemoryObjects(this.memory, query), message: "Organization-scoped semantic keyword search completed." }; }
+  async index(request: KnowledgeIndexRequest): Promise<KnowledgeProviderResponse<IndexingJob>> { const memory = request.memory ?? (request.document ? createMemoryObject({ id: request.document.id, organizationId: String(request.document.metadata?.organizationId ?? "law-library"), sourceProvider: this.metadata.id, sourceIdentifier: request.document.sourceUri ?? request.document.id, title: request.document.title, content: String(request.document.metadata?.content ?? request.document.title), summary: request.document.title, metadata: request.document.metadata as MemoryObject["metadata"] ?? {}, labels: [], tags: [], permissions: [], owner: "knowledge-os", created: now, updated: request.document.updatedAt ?? now }) : null); if (!memory) return { ok: false, data: { id: "idx_missing", memoryId: "missing", organizationId: "missing", providerId: this.metadata.id, status: "failed", errors: ["Document or memory is required."], startedAt: now, completedAt: now, chunks: [] } }; const job = orchestrateIndexing(memory); this.memory = [...this.memory.filter((item) => item.id !== memory.id), memory]; this.jobs = [...this.jobs.filter((item) => item.memoryId !== memory.id), job]; this.metadata.indexedDocumentCount = this.memory.length; this.metadata.lastSyncAt = job.completedAt; return { ok: job.status === "indexed", data: job }; }
+  listJobs(): KnowledgeProviderResponse<IndexingJob[]> { return { ok: true, data: this.jobs }; }
+  async listMemory(organizationId?: string): Promise<KnowledgeProviderResponse<MemoryObject[]>> { return { ok: true, data: organizationId ? this.memory.filter((item) => item.organizationId === organizationId) : this.memory }; }
+  async getMemory(id: string): Promise<KnowledgeProviderResponse<MemoryObject | null>> { const memory = this.memory.find((item) => item.id === id) ?? null; return { ok: Boolean(memory), data: memory }; }
+  async upsertMemory(memory: MemoryObject): Promise<KnowledgeProviderResponse<MemoryObject>> { const job = orchestrateIndexing(memory); this.memory = [...this.memory.filter((item) => item.id !== memory.id), { ...memory, status: job.status === "indexed" ? "indexed" : "failed" }]; this.jobs = [...this.jobs, job]; this.metadata.indexedDocumentCount = this.memory.length; return { ok: job.status === "indexed", data: memory }; }
+  async refresh(): Promise<KnowledgeProviderResponse<KnowledgeProviderMetadata>> { this.metadata.lastSyncAt = new Date().toISOString(); return { ok: true, data: this.metadata }; }
+}
