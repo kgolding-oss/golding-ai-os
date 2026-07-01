@@ -3,6 +3,7 @@ import { AgentStatusPanel } from "../../components/dashboard/AgentStatusPanel";
 import { AttentionQueue } from "../../components/dashboard/AttentionQueue";
 import { CommandBar } from "../../components/dashboard/CommandBar";
 import { DashboardHeader } from "../../components/dashboard/DashboardHeader";
+import { ExecutiveCommandCenter } from "../../components/dashboard/ExecutiveCommandCenter";
 import { ExecutiveBrief } from "../../components/dashboard/ExecutiveBrief";
 import { ExecutiveWorkflowPanel } from "../../components/dashboard/ExecutiveWorkflowPanel";
 import { MetricsGrid } from "../../components/dashboard/MetricsGrid";
@@ -32,6 +33,7 @@ import { currentPath, requireActiveOrganization } from "../../lib/activeOrganiza
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
 import { getDashboardData } from "../../lib/dashboard/queries";
+import { getProductionData } from "../../lib/operations-data";
 import { buildKnowledgeHealthReport, knowledgeRegistry } from "../../lib/knowledge";
 import { AgentOrchestrator } from "../../lib/orchestration";
 import { workflowEngine } from "../../lib/workflows";
@@ -62,6 +64,7 @@ async function safeDiagnostics(token?: string | null, organizationId?: string | 
 export default async function DashboardPage() {
   const { session, activeOrganization, memberships } = await requireActiveOrganization();
   const data = await getDashboardData(session.access_token, activeOrganization?.id);
+  const productionData = await getProductionData(session.access_token, activeOrganization?.id);
   const activeOrganizationRecord = data.organizations[0] ?? activeOrganization ?? null;
   const metrics = buildMetrics(data);
   const pendingApprovals = data.approvals.filter((approval) => approval.status === "pending").length;
@@ -107,6 +110,7 @@ const crmSnapshot = crmRuntime.synthesize({
       <DashboardHeader organizationCount={data.organizations.length} pendingApprovals={pendingApprovals} />
       <CommandBar />
       <MetricsGrid metrics={metrics} />
+      <ExecutiveCommandCenter tasks={data.tasks} approvals={data.approvals} agents={data.agents} health={data.health} projects={data.projects} activity={data.activity} production={productionData} />
       <section className="grid twoColumn">
         <ExecutiveBrief organization={activeOrganizationRecord} tasks={data.tasks} approvals={data.approvals} agents={data.agents} health={data.health} projects={data.projects} activity={data.activity} auditLogs={data.auditLogs} membershipCount={data.memberships.length} />
         <AttentionQueue items={attentionItems} />

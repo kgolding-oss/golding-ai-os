@@ -54,3 +54,19 @@ Executive Command supports deterministic routing for commands such as:
 - “Generate executive summary.”
 
 Every command delegates through the Chief of Staff and returns auditable recommendations or drafts only.
+
+## Milestone 11 production activation
+
+The Executive Command dashboard is now the default landing experience. It reads only organization-scoped production repositories and task/approval/agent/health records. When a production repository is empty or unavailable, the dashboard reports that state explicitly instead of inventing cases, grants, sponsors, donors, partners, volunteers, knowledge sources, or media assets.
+
+### Daily executive operating loop
+
+- **Morning Executive Briefing** surfaces priority tasks, pending approvals, active projects, AI workforce activity, and connector health.
+- **Evening Executive Debrief** summarizes activity events and unresolved human decisions for closeout.
+- **Daily Priority Queue** is derived from task priority and due dates.
+- **Operational Mission Control** groups populated production repositories into actionable queues for case operations, funding, education/media, partnerships, research/knowledge, volunteers, and impact reporting.
+- **System Health** degrades gracefully when optional credentials or repositories are absent.
+
+### Production repositories
+
+Milestone 11 introduces the production data layer for programs, clients, cases, funding, sponsors, donors, partners, volunteers, knowledge sources, and media assets. These repositories are optional at runtime and organization isolated. The UI treats missing credentials or not-yet-created tables as an operational readiness signal rather than a fatal dashboard error.
