@@ -34,3 +34,28 @@ export class KnowledgeDiscoveryWorkflow implements Workflow<unknown, { providers
     return { workflowId: this.id, executionId, title: this.name, summary: `${providers.length} providers registered and ${results.data.length} deterministic results discovered.`, sections: [{ title: "Providers", items: providers.map((provider) => `${provider.name}: ${provider.status}; ${provider.indexedDocumentCount} indexed documents`) }, { title: "Discovery results", items: results.data.map((result) => `${result.document.title} (${result.providerId})`) }], recommendations: ["Connect production provider credentials in a future milestone before automated indexing."], metadata: { providerCount: providers.length }, data: { providers: providers.length, results: results.data.length } };
   }
 }
+
+
+const enterpriseWorkflowDefinitions = [
+  { id: "grant-lifecycle", name: "Grant Lifecycle", handoff: "Research → Grant Writing → Funding → Finance" },
+  { id: "sponsor-lifecycle", name: "Sponsor Lifecycle", handoff: "CRM → Funding → Finance" },
+  { id: "case-lifecycle", name: "Case Lifecycle", handoff: "Research → Legal → Knowledge" },
+  { id: "volunteer-onboarding", name: "Volunteer Onboarding", handoff: "CRM → Operations → Education" },
+  { id: "board-meetings", name: "Board Meetings", handoff: "Chief of Staff → Executive Intelligence → Finance" },
+  { id: "project-approvals", name: "Project Approvals", handoff: "Operations → Finance → Executive Approval" },
+  { id: "media-production", name: "Media Production", handoff: "Media → Education → Legal" },
+  { id: "course-publishing", name: "Course Publishing", handoff: "Education → Media → Knowledge" },
+];
+
+export class ApprovalGatedEnterpriseWorkflow implements Workflow<unknown, { approvalRequired: boolean; handoff: string }> {
+  version = "1.0.0"; triggerType = "manual" as const; status = "ready" as const; description: string;
+  constructor(public readonly id: string, public readonly name: string, private readonly handoff: string) { this.description = `${name} coordinates ${handoff} and blocks external actions until human approval.`; }
+  validate() { return valid(); }
+  async execute(context: WorkflowContext, executionId: string): Promise<WorkflowResult<{ approvalRequired: boolean; handoff: string }>> {
+    return { workflowId: this.id, executionId, title: this.name, summary: `${this.name} prepared through ${this.handoff}. Human approval is required before any external or high-risk action.`, sections: [{ title: "Delegation", items: [this.handoff, "Chief of Staff coordinates all handoffs."] }, { title: "Approval boundary", items: ["External action: blocked until approved", "High-risk action: blocked until approved"] }], recommendations: ["Review source records, then approve or reject the next external action."], metadata: { organizationId: context.organizationId ?? null, approvalRequired: true }, data: { approvalRequired: true, handoff: this.handoff } };
+  }
+}
+
+export function createEnterpriseWorkflows() {
+  return enterpriseWorkflowDefinitions.map((workflow) => new ApprovalGatedEnterpriseWorkflow(workflow.id, workflow.name, workflow.handoff));
+}
