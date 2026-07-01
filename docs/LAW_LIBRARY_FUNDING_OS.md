@@ -24,3 +24,7 @@ The runtime tracks funding goals, grants, sponsors, donors, partners, deadlines,
 ## Human approval requirements
 
 The system is designed as a planning and drafting layer only. Human approval is required before any external outreach, submission, sponsorship commitment, financial promise, or compliance-sensitive action is executed.
+
+## Milestone 10 production activation
+
+Funding Operations now includes grant pipeline, grant calendar, grant writer workspace, sponsor CRM, donor CRM, foundation CRM, corporate partnership CRM, campaign tracker, funding forecast, revenue dashboard, board reporting, impact reporting, compliance checklist, and submission queue. Grant submissions, sponsor outreach, emails, and financial transactions require explicit approval.
