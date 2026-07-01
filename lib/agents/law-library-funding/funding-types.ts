@@ -1,0 +1,17 @@
+export type FundingAgentRole = "grant_research" | "grant_drafting" | "sponsor_acquisition" | "donor_development" | "partnership_development" | "compliance_review" | "impact_reporting" | "campaign_operations";
+export type FundingRecordStatus = "prospect" | "qualified" | "drafting" | "approval_required" | "submitted" | "committed" | "awarded" | "reporting" | "closed" | "risk";
+export type ApprovalSensitiveAction = "external_outreach" | "submission" | "sponsorship_commitment" | "financial_promise" | "compliance_sensitive_action";
+export type FundingApproval = { id: string; action: ApprovalSensitiveAction; label: string; status: "pending" | "approved" | "rejected"; requiredBy: string; owner: string };
+export type FundingGoal = { id: string; label: string; target: number; secured: number; forecast: number; deadline: string; owner: string };
+export type FundingGrant = { id: string; funder: string; program: string; amount: number; probability: number; deadline: string; status: FundingRecordStatus; owner: FundingAgentRole; proposalId?: string; reportId?: string };
+export type FundingSponsor = { id: string; name: string; level: string; amount: number; probability: number; status: FundingRecordStatus; nextStep: string; approvalId?: string };
+export type FundingDonor = { id: string; name: string; segment: "major" | "recurring" | "community" | "board" | "institutional"; askAmount: number; probability: number; status: FundingRecordStatus; nextStep: string; approvalId?: string };
+export type FundingPartner = { id: string; name: string; purpose: string; value: number; probability: number; status: FundingRecordStatus; nextStep: string; approvalId?: string };
+export type FundingDeadline = { id: string; recordId: string; label: string; dueAt: string; owner: FundingAgentRole; status: "upcoming" | "due_soon" | "overdue" | "complete" };
+export type FundingProposal = { id: string; title: string; relatedTo: string; status: "outline" | "draft" | "review" | "approval_required" | "ready" | "submitted"; owner: FundingAgentRole; approvalId?: string };
+export type FundingReport = { id: string; title: string; relatedTo: string; dueAt: string; status: "draft" | "review" | "approval_required" | "submitted"; owner: FundingAgentRole; approvalId?: string };
+export type OutreachDraft = { id: string; audience: "grantor" | "sponsor" | "donor" | "partner" | "media"; subject: string; relatedTo: string; status: "draft" | "review" | "approval_required" | "approved" | "sent"; owner: FundingAgentRole; approvalId: string };
+export type RiskFlag = { id: string; severity: "critical" | "high" | "medium" | "low"; title: string; mitigation: string; relatedTo?: string };
+export type FundingIntegration = { agent: "Grant Development Agent" | "CRM Agent" | "Finance & Operations Agent" | "Research & Intelligence Agent" | "Media & Communications Agent" | "Chief of Staff" | "Executive Command Agent"; responsibility: string };
+export type FundingSubAgent = { role: FundingAgentRole; name: string; responsibilities: string[]; approvalBoundaries: ApprovalSensitiveAction[] };
+export type LawLibraryFundingSnapshot = { systemName: "The Law Library Funding OS"; agents: FundingSubAgent[]; integrations: FundingIntegration[]; goals: FundingGoal[]; grants: FundingGrant[]; sponsors: FundingSponsor[]; donors: FundingDonor[]; partners: FundingPartner[]; deadlines: FundingDeadline[]; proposals: FundingProposal[]; reports: FundingReport[]; outreachDrafts: OutreachDraft[]; approvals: FundingApproval[]; weightedForecast: number; riskFlags: RiskFlag[]; generatedAt: string };

@@ -25,6 +25,7 @@ export async function GET() {
     const { crmHealthSnapshot } = await import("../../../lib/agents/crm");
     const { mediaCommunicationsHealthSnapshot } = await import("../../../lib/agents/media-communications");
     const { researchIntelligenceHealthSnapshot } = await import("../../../lib/agents/research-intelligence");
+    const { lawLibraryFundingHealthSnapshot } = await import("../../../lib/agents/law-library-funding");
 
     const { githubHealthSnapshot } = await import("../../../lib/connectors/providers/github");
     const { vercelHealthSnapshot } = await import("../../../lib/connectors/providers/vercel");
@@ -45,6 +46,7 @@ export async function GET() {
     const crm = crmHealthSnapshot();
     const mediaCommunications = mediaCommunicationsHealthSnapshot();
     const researchIntelligence = researchIntelligenceHealthSnapshot();
+    const lawLibraryFunding = lawLibraryFundingHealthSnapshot();
 
     const github = githubHealthSnapshot();
     const vercel = vercelHealthSnapshot();
@@ -75,6 +77,7 @@ export async function GET() {
         crm,
         mediaCommunications,
         researchIntelligence,
+        lawLibraryFunding,
       },
       { status },
     );

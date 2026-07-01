@@ -24,6 +24,7 @@ import { GrantDevelopmentPanel } from "../../components/grant-development/GrantD
 import { MediaCommunicationsPanel } from "../../components/media-communications/MediaCommunicationsPanel";
 import { CrmRelationshipPanel } from "../../components/crm/CrmRelationshipPanel";
 import { FinanceOperationsPanel } from "../../components/finance-operations/FinanceOperationsPanel";
+import { LawLibraryFundingPanel } from "../../components/law-library-funding/LawLibraryFundingPanel";
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
@@ -43,6 +44,7 @@ import { grantDevelopmentRuntime } from "../../lib/agents/grant-development";
 import { mediaRuntime } from "../../lib/agents/media-communications";
 import { crmRuntime } from "../../lib/agents/crm";
 import { financeOperationsRuntime } from "../../lib/agents/finance-operations";
+import { lawLibraryFundingRuntime } from "../../lib/agents/law-library-funding";
 import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recoveryEngine } from "../../lib/autonomy";
 import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary } from "../../lib/ai";
 import { mcpRegistry } from "../../lib/connectors/providers/mcp";
@@ -93,6 +95,7 @@ const crmSnapshot = crmRuntime.synthesize({
   now: new Date(),
 });
   const financeSnapshot = financeOperationsRuntime.synthesize({ organizationId: activeOrganizationRecord?.id, now: new Date() });
+  const lawLibraryFundingSnapshot = lawLibraryFundingRuntime.synthesize({ now: new Date() });
   const chiefOfStaffSnapshot = await chiefOfStaffRuntime.synthesize({ organization: activeOrganizationRecord, dashboard: data, executiveIntelligence: executiveSnapshot, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory, autonomousPlans: autonomyEngine.listPlans(), pendingApprovals: approvalEngine.list() }, { token: session.access_token, organizationId: activeOrganizationRecord?.id, profileId: session.user?.id });
   const autonomousPlan = autonomyEngine.createExecutionPlan({ organization: activeOrganizationRecord ? { id: activeOrganizationRecord.id, name: activeOrganizationRecord.name } : null, executiveIntelligence: executiveSnapshot, workflows, runtimeTools, connectors, knowledgeHealth, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, operatingHistory, source: "dashboard" });
   if (!autonomousScheduler.list().some((schedule) => schedule.planId === autonomousPlan.id)) autonomousScheduler.schedule(autonomousPlan.id, autonomousPlan.organizationId, { type: "delayed", delayMs: 300000 });
@@ -127,7 +130,7 @@ const crmSnapshot = crmRuntime.synthesize({
 <CrmRelationshipPanel snapshot={crmSnapshot} />
 <MediaCommunicationsPanel snapshot={mediaSnapshot} />
 <FinanceOperationsPanel snapshot={financeSnapshot} />
-      <FinanceOperationsPanel snapshot={financeSnapshot} />
+<LawLibraryFundingPanel snapshot={lawLibraryFundingSnapshot} />
       <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
