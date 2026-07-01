@@ -45,14 +45,45 @@ function parseInsertCols(table) {
 function migrationHas(table, col){ return new RegExp(`\\b${table}\\b[\\s\\S]*?\\b${col}\\b`,'i').test(allMigrationSql); }
 const referenced = [...new Set([...inserts.keys(),...reads.keys()])].sort();
 const missingTables = referenced.filter(t=>!tableDefs.has(t));
+
+const columnClassifications = {
+  // Nested JSON payload fields captured from object literals passed to insert helpers.
+  "autonomous_history.eventType": "JSON payload field",
+  "command_executions.commandText": "JSON payload field",
+  "health_snapshots.type": "JSON payload field",
+  "orchestration_tasks.error": "JSON payload field",
+  "orchestration_tasks.taskId": "JSON payload field",
+  "workflow_executions.executionId": "JSON payload field",
+  "workflow_executions.workflowId": "JSON payload field",
+  "workflow_execution_steps.executionId": "JSON payload field",
+  "workflow_execution_steps.stepName": "JSON payload field",
+  "workflow_execution_steps.workflowId": "JSON payload field",
+
+  // Nested JSON result fields captured from executive snapshot summaries.
+  "executive_snapshots.approvals": "JSON result field",
+  "executive_snapshots.delegations": "JSON result field",
+  "executive_snapshots.priorities": "JSON result field",
+  "executive_snapshots.recommendations": "JSON result field",
+  "executive_snapshots.risks": "JSON result field",
+  "executive_snapshots.score": "JSON result field"
+};
 const missingColumns = [];
-for (const t of inserts.keys()) for (const c of parseInsertCols(t)) if (tableDefs.has(t) && !migrationHas(t,c)) missingColumns.push(`${t}.${c}`);
+const classifiedColumns = {};
+for (const t of inserts.keys()) for (const c of parseInsertCols(t)) {
+  const key = `${t}.${c}`;
+  if (tableDefs.has(t) && !migrationHas(t,c)) {
+    const classification = columnClassifications[key];
+    if (classification) classifiedColumns[key] = classification;
+    else missingColumns.push(key);
+  }
+}
+
 const brokenDynamicImports = dynamicImports.filter(d=>d.spec.startsWith('.') ).filter(d=>{
   const base=path.dirname(path.join(root,d.from)); const target=path.resolve(base,d.spec);
   return !['.ts','.tsx','.js','.jsx','.mjs','.cjs'].some(ext=>fs.existsSync(target+ext)) && !fs.existsSync(path.join(target,'index.ts')) && !fs.existsSync(path.join(target,'index.tsx'));
 });
 const rlsMissing = referenced.filter(t=>tableDefs.has(t) && !new RegExp(`alter\\s+table\\s+(?:public\\.)?${t}\\s+enable\\s+row\\s+level\\s+security`,'i').test(allMigrationSql));
 const indexMissing = referenced.filter(t=>tableDefs.has(t) && !new RegExp(`create\\s+index[\\s\\S]*?on\\s+(?:public\\.)?${t}\\b`,'i').test(allMigrationSql));
-const report = { generatedAt:new Date().toISOString(), referencedTables:{inserts:Object.fromEntries(inserts), reads:Object.fromEntries(reads), all:referenced}, migrations:{files:migrations.map(rel), tables:Object.fromEntries(tableDefs), executiveSnapshotsMigration:migrations.map(rel).find(f=>f.includes('executive_snapshots'))??null}, findings:{missingTables, missingColumns, tablesMissingRls:rlsMissing, tablesMissingIndexes:indexMissing, brokenDynamicImports}, env:Object.fromEntries(env) };
+const report = { generatedAt:new Date().toISOString(), referencedTables:{inserts:Object.fromEntries(inserts), reads:Object.fromEntries(reads), all:referenced}, migrations:{files:migrations.map(rel), tables:Object.fromEntries(tableDefs), executiveSnapshotsMigration:migrations.map(rel).find(f=>f.includes('executive_snapshots'))??null}, findings:{missingTables, missingColumns, classifiedColumns, tablesMissingRls:rlsMissing, tablesMissingIndexes:indexMissing, brokenDynamicImports}, env:Object.fromEntries(env) };
 console.log(JSON.stringify(report,null,2));
 if (process.argv.includes('--fail-on-critical') && (missingTables.length||brokenDynamicImports.length)) process.exit(1);
