@@ -30,6 +30,7 @@ import { FinanceOperationsPanel } from "../../components/finance-operations/Fina
 import { LawLibraryFundingPanel } from "../../components/law-library-funding/LawLibraryFundingPanel";
 import { LawLibraryOSPanel } from "../../components/law-library-os/LawLibraryOSPanel";
 import { PluginMarketplacePanel } from "../../components/plugins/PluginMarketplacePanel";
+import { EnterpriseGovernancePanel } from "../../components/governance/EnterpriseGovernancePanel";
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { AIIntegrationHubPanel } from "../../components/ai/AIIntegrationHubPanel";
@@ -56,6 +57,7 @@ import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recov
 import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary, aiIntegrationHub } from "../../lib/ai";
 import { mcpRegistry } from "../../lib/connectors/providers/mcp";
 import { marketplaceSnapshot } from "../../lib/plugins";
+import { buildGovernanceSnapshot } from "../../lib/governance";
 
 async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
   try { return { health: await getPlatformHealth({ token, organizationId }), diagnostics: runDiagnostics() }; }
@@ -101,6 +103,7 @@ const mediaSnapshot = mediaRuntime.synthesize({
 });
 
   const pluginMarketplace = marketplaceSnapshot();
+  const governanceSnapshot = buildGovernanceSnapshot(new Date());
 
 const crmSnapshot = crmRuntime.synthesize({
   organizationId: activeOrganizationRecord?.id,
@@ -149,6 +152,7 @@ const crmSnapshot = crmRuntime.synthesize({
 <LawLibraryFundingPanel snapshot={lawLibraryFundingSnapshot} />
 <LawLibraryOSPanel />
 <PluginMarketplacePanel marketplace={pluginMarketplace} />
+<EnterpriseGovernancePanel snapshot={governanceSnapshot} />
       <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
