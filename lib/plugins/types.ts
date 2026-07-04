@@ -1,0 +1,12 @@
+export type PluginType = "ai_department" | "industry_module" | "connector" | "knowledge_provider" | "workflow_pack" | "dashboard_widget" | "executive_report" | "automation_pack";
+export type PluginCategory = "installed" | "available" | "updates" | "featured" | "official" | "community";
+export type PluginHealth = "healthy" | "degraded" | "unhealthy" | "disabled";
+export type PluginPermission = { id: string; description: string; approvalRequired?: boolean };
+export type PluginSecurity = { permissions: PluginPermission[]; externalApis: string[]; storage: string[]; networkAccess: "none" | "restricted" | "external"; approvalRequirements: string[]; auditEvents: string[] };
+export type PluginCompatibility = { coreVersion: string; workspaces: string[]; organizations: string[]; themes: string[] };
+export type PluginBranding = { name: string; description: string; icon?: string; accentColor?: string; whiteLabelReady: boolean };
+export type PluginCapability = "department" | "workflow" | "dashboard" | "knowledge" | "connector" | "report" | "automation";
+export type PluginManifest = { id: string; version: string; author: string; type: PluginType; categories: PluginCategory[]; dependencies: string[]; capabilities: PluginCapability[]; health: PluginHealth; compatibility: PluginCompatibility; branding: PluginBranding; security: PluginSecurity };
+export type InstalledPlugin = PluginManifest & { enabled: boolean; installedAt: string; updatedAt: string };
+export type PluginHealthCheck = { pluginId: string; status: PluginHealth; messages: string[]; checkedAt: string };
+export type PluginOperationResult = { ok: boolean; pluginId: string; message: string };
