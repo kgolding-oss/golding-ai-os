@@ -1,0 +1,41 @@
+name: GAIOS CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate platform safety gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: GAIOS audit
+        run: npm run audit:gaios
+
+      - name: TypeScript validation
+        run: npx tsc --noEmit
+
+      - name: Lint validation
+        run: npm run lint
+
+      - name: Production build validation
+        run: npm run build
