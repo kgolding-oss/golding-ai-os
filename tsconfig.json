@@ -21,8 +21,7 @@
         "name": "next"
       }
     ],
-    "target": "es2018",
-    "ignoreDeprecations": "6.0"
+    "target": "es2018"
   },
   "include": [
     "next-env.d.ts",
