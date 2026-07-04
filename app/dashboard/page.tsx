@@ -32,6 +32,7 @@ import { LawLibraryOSPanel } from "../../components/law-library-os/LawLibraryOSP
 import { PluginMarketplacePanel } from "../../components/plugins/PluginMarketplacePanel";
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
+import { AIIntegrationHubPanel } from "../../components/ai/AIIntegrationHubPanel";
 import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
 import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
@@ -52,7 +53,7 @@ import { crmRuntime } from "../../lib/agents/crm";
 import { financeOperationsRuntime } from "../../lib/agents/finance-operations";
 import { lawLibraryFundingRuntime } from "../../lib/agents/law-library-funding";
 import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recoveryEngine } from "../../lib/autonomy";
-import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary } from "../../lib/ai";
+import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary, aiIntegrationHub } from "../../lib/ai";
 import { mcpRegistry } from "../../lib/connectors/providers/mcp";
 import { marketplaceSnapshot } from "../../lib/plugins";
 
@@ -91,6 +92,7 @@ export default async function DashboardPage() {
   const aiTools = toolRegistry.list();
   const mcpServers = mcpRegistry.list();
   const aiOperationsScore = Math.max(0, Math.min(100, 50 + aiModels.length * 10 + aiTools.length * 3 - aiTelemetry.sessions.failures * 10));
+  const aiIntegrationDashboard = aiIntegrationHub.dashboard();
   const executiveSnapshot = executiveIntelligenceEngine.analyze({ organization: activeOrganizationRecord, dashboard: data, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory });
   const grantSnapshot = grantDevelopmentRuntime.synthesize({ organizationId: activeOrganizationRecord?.id, now: new Date() });
 const mediaSnapshot = mediaRuntime.synthesize({
@@ -134,6 +136,7 @@ const crmSnapshot = crmRuntime.synthesize({
       <KnowledgeDashboard health={knowledgeHealth} />
       <AIRuntimePanel tools={runtimeTools} sessions={runtimeSessions} metrics={runtimeMetrics} />
       <AIPlatformPanel models={aiModels} prompts={aiPrompts} tools={aiTools} mcpServers={mcpServers} sessions={aiTelemetry.sessions} costs={{ tokens: aiTelemetry.tokens, costUsd: aiTelemetry.costUsd, latencyMs: aiTelemetry.latencyMs }} />
+      <AIIntegrationHubPanel dashboard={aiIntegrationDashboard} />
       <AIOperationsPanel score={aiOperationsScore} items={{ aiReadiness: aiModels.length ? "ready" : "awaiting model registration", modelHealth: `${aiModels.length} registered`, mcpHealth: `${mcpServers.length} servers`, promptQuality: `${aiPrompts.length} versions`, toolReadiness: `${aiTools.length} tools`, executionEfficiency: `${aiTelemetry.sessions.completed} completed`, costEfficiency: `$${aiTelemetry.costUsd.toFixed(6)}` }} />
       <EnterpriseConnectorsPanel connectors={connectors} sessions={connectorSessions} diagnostics={connectorDiagnostics} />
       <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
