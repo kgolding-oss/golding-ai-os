@@ -36,18 +36,32 @@ import { MacKnowledgeVaultPanel } from "../../components/mac-knowledge-vault/Mac
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { AIIntegrationHubPanel } from "../../components/ai/AIIntegrationHubPanel";
-import { currentPath, requireActiveOrganization } from "../../lib/activeOrganization";
-import { buildAttentionQueue, buildRecommendations } from "../../lib/dashboard/intelligence";
+import { LiveDataOnboardingPanel } from "../../components/live-data/LiveDataOnboardingPanel";
+import {
+  currentPath,
+  requireActiveOrganization,
+} from "../../lib/activeOrganization";
+import {
+  buildAttentionQueue,
+  buildRecommendations,
+} from "../../lib/dashboard/intelligence";
 import { buildMetrics } from "../../lib/dashboard/metrics";
 import { getDashboardData } from "../../lib/dashboard/queries";
 import { getProductionData } from "../../lib/operations-data";
-import { buildKnowledgeHealthReport, knowledgeRegistry } from "../../lib/knowledge";
+import {
+  buildKnowledgeHealthReport,
+  knowledgeRegistry,
+} from "../../lib/knowledge";
 import { AgentOrchestrator } from "../../lib/orchestration";
 import { workflowEngine } from "../../lib/workflows";
 import { getOperatingHistory } from "../../lib/persistence";
 import { aiRuntime } from "../../lib/runtime";
 import { connectorManager } from "../../lib/connectors";
-import { getPlatformHealth, runDiagnostics, logger } from "../../lib/observability";
+import {
+  getPlatformHealth,
+  runDiagnostics,
+  logger,
+} from "../../lib/observability";
 import { executiveIntelligenceEngine } from "../../lib/intelligence";
 import { chiefOfStaffRuntime } from "../../lib/agents/chief-of-staff";
 import { grantDevelopmentRuntime } from "../../lib/agents/grant-development";
@@ -55,86 +69,302 @@ import { mediaRuntime } from "../../lib/agents/media-communications";
 import { crmRuntime } from "../../lib/agents/crm";
 import { financeOperationsRuntime } from "../../lib/agents/finance-operations";
 import { lawLibraryFundingRuntime } from "../../lib/agents/law-library-funding";
-import { approvalEngine, autonomyEngine, autonomousScheduler, retryEngine, recoveryEngine } from "../../lib/autonomy";
-import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary, aiIntegrationHub } from "../../lib/ai";
+import {
+  approvalEngine,
+  autonomyEngine,
+  autonomousScheduler,
+  retryEngine,
+  recoveryEngine,
+} from "../../lib/autonomy";
+import {
+  modelRegistry,
+  promptRegistry,
+  toolRegistry,
+  aiTelemetrySummary,
+  aiIntegrationHub,
+} from "../../lib/ai";
 import { mcpRegistry } from "../../lib/connectors/providers/mcp";
 import { marketplaceSnapshot } from "../../lib/plugins";
 import { buildGovernanceSnapshot } from "../../lib/governance";
-import { buildDigitalTwin, buildSimulationDashboard, compareScenarios, defaultExecutiveScenarios } from "../../lib/digital-twin";
-import { generateDigitalArchivistReport, MacGOLDInventoryProvider } from "../../lib/mac-knowledge-vault";
+import {
+  buildDigitalTwin,
+  buildSimulationDashboard,
+  compareScenarios,
+  defaultExecutiveScenarios,
+} from "../../lib/digital-twin";
+import {
+  generateDigitalArchivistReport,
+  MacGOLDInventoryProvider,
+} from "../../lib/mac-knowledge-vault";
+import { buildLiveDataOnboardingDashboard } from "../../lib/live-data-onboarding";
 
-async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
-  try { return { health: await getPlatformHealth({ token, organizationId }), diagnostics: runDiagnostics() }; }
-  catch (error) {
-    logger.error("dashboard.diagnostics.failed", "Dashboard diagnostics failed safely.", error, undefined, { subsystem: "dashboard" });
+async function safeDiagnostics(
+  token?: string | null,
+  organizationId?: string | null,
+) {
+  try {
+    return {
+      health: await getPlatformHealth({ token, organizationId }),
+      diagnostics: runDiagnostics(),
+    };
+  } catch (error) {
+    logger.error(
+      "dashboard.diagnostics.failed",
+      "Dashboard diagnostics failed safely.",
+      error,
+      undefined,
+      { subsystem: "dashboard" },
+    );
     const timestamp = new Date().toISOString();
-    return { health: { status: "unhealthy" as const, subsystems: [], warnings: [], errors: ["Diagnostics failed safely."], timestamp }, diagnostics: { status: "unhealthy" as const, findings: [{ severity: "error" as const, subsystem: "diagnostics", id: "dashboard", message: "Diagnostics panel failed safely." }], counts: { tools: 0, workflows: 0, commands: 0, knowledgeProviders: 0, orchestrationAgents: 0 }, timestamp } };
+    return {
+      health: {
+        status: "unhealthy" as const,
+        subsystems: [],
+        warnings: [],
+        errors: ["Diagnostics failed safely."],
+        timestamp,
+      },
+      diagnostics: {
+        status: "unhealthy" as const,
+        findings: [
+          {
+            severity: "error" as const,
+            subsystem: "diagnostics",
+            id: "dashboard",
+            message: "Diagnostics panel failed safely.",
+          },
+        ],
+        counts: {
+          tools: 0,
+          workflows: 0,
+          commands: 0,
+          knowledgeProviders: 0,
+          orchestrationAgents: 0,
+        },
+        timestamp,
+      },
+    };
   }
 }
 
 export default async function DashboardPage() {
-  const { session, activeOrganization, memberships } = await requireActiveOrganization();
-  const data = await getDashboardData(session.access_token, activeOrganization?.id);
-  const productionData = await getProductionData(session.access_token, activeOrganization?.id);
-  const activeOrganizationRecord = data.organizations[0] ?? activeOrganization ?? null;
+  const { session, activeOrganization, memberships } =
+    await requireActiveOrganization();
+  const data = await getDashboardData(
+    session.access_token,
+    activeOrganization?.id,
+  );
+  const productionData = await getProductionData(
+    session.access_token,
+    activeOrganization?.id,
+  );
+  const activeOrganizationRecord =
+    data.organizations[0] ?? activeOrganization ?? null;
   const metrics = buildMetrics(data);
-  const pendingApprovals = data.approvals.filter((approval) => approval.status === "pending").length;
+  const pendingApprovals = data.approvals.filter(
+    (approval) => approval.status === "pending",
+  ).length;
   const attentionItems = buildAttentionQueue(data);
-  const recommendations = buildRecommendations({ ...data, organization: activeOrganizationRecord, membershipCount: data.memberships.length });
+  const recommendations = buildRecommendations({
+    ...data,
+    organization: activeOrganizationRecord,
+    membershipCount: data.memberships.length,
+  });
   const knowledgeHealth = buildKnowledgeHealthReport(knowledgeRegistry);
   const workflows = workflowEngine.listWorkflows();
   const agentOrchestrator = AgentOrchestrator.fromDashboardAgents(data.agents);
-  const operatingHistory = await getOperatingHistory({ token: session.access_token, organizationId: activeOrganizationRecord?.id, profileId: session.user?.id });
+  const operatingHistory = await getOperatingHistory({
+    token: session.access_token,
+    organizationId: activeOrganizationRecord?.id,
+    profileId: session.user?.id,
+  });
   const runtimeTools = aiRuntime.registry.listTools();
-  const runtimeSessions = aiRuntime.executor.sessions.filter((runtimeSession) => !activeOrganizationRecord?.id || runtimeSession.organizationId === activeOrganizationRecord.id);
+  const runtimeSessions = aiRuntime.executor.sessions.filter(
+    (runtimeSession) =>
+      !activeOrganizationRecord?.id ||
+      runtimeSession.organizationId === activeOrganizationRecord.id,
+  );
   const runtimeMetrics = aiRuntime.telemetry.metrics();
-  const diagnosticsSnapshot = await safeDiagnostics(session.access_token, activeOrganizationRecord?.id);
+  const diagnosticsSnapshot = await safeDiagnostics(
+    session.access_token,
+    activeOrganizationRecord?.id,
+  );
   const connectors = connectorManager.list();
-  const connectorSessions = connectorManager.runtime.sessions.filter((connectorSession) => !activeOrganizationRecord?.id || connectorSession.context.organizationId === activeOrganizationRecord.id);
+  const connectorSessions = connectorManager.runtime.sessions.filter(
+    (connectorSession) =>
+      !activeOrganizationRecord?.id ||
+      connectorSession.context.organizationId === activeOrganizationRecord.id,
+  );
   const connectorDiagnostics = connectorManager.diagnostics();
   const aiTelemetry = aiTelemetrySummary();
   const aiModels = modelRegistry.list();
   const aiPrompts = promptRegistry.list();
   const aiTools = toolRegistry.list();
   const mcpServers = mcpRegistry.list();
-  const aiOperationsScore = Math.max(0, Math.min(100, 50 + aiModels.length * 10 + aiTools.length * 3 - aiTelemetry.sessions.failures * 10));
+  const aiOperationsScore = Math.max(
+    0,
+    Math.min(
+      100,
+      50 +
+        aiModels.length * 10 +
+        aiTools.length * 3 -
+        aiTelemetry.sessions.failures * 10,
+    ),
+  );
   const aiIntegrationDashboard = aiIntegrationHub.dashboard();
-  const executiveSnapshot = executiveIntelligenceEngine.analyze({ organization: activeOrganizationRecord, dashboard: data, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory });
-  const grantSnapshot = grantDevelopmentRuntime.synthesize({ organizationId: activeOrganizationRecord?.id, now: new Date() });
-const mediaSnapshot = mediaRuntime.synthesize({
-  organizationId: activeOrganizationRecord?.id,
-  now: new Date(),
-});
+  const liveDataOnboardingDashboard = buildLiveDataOnboardingDashboard();
+  const executiveSnapshot = executiveIntelligenceEngine.analyze({
+    organization: activeOrganizationRecord,
+    dashboard: data,
+    platformHealth: diagnosticsSnapshot.health,
+    diagnostics: diagnosticsSnapshot.diagnostics,
+    knowledgeHealth,
+    workflows,
+    runtimeTools,
+    runtimeSessions,
+    runtimeMetrics,
+    connectors,
+    connectorSessions,
+    connectorDiagnostics,
+    operatingHistory,
+  });
+  const grantSnapshot = grantDevelopmentRuntime.synthesize({
+    organizationId: activeOrganizationRecord?.id,
+    now: new Date(),
+  });
+  const mediaSnapshot = mediaRuntime.synthesize({
+    organizationId: activeOrganizationRecord?.id,
+    now: new Date(),
+  });
 
   const pluginMarketplace = marketplaceSnapshot();
   const governanceSnapshot = buildGovernanceSnapshot(new Date());
-  const macKnowledgeVaultSnapshot = await new MacGOLDInventoryProvider().loadSnapshot();
-  const macKnowledgeVaultReport = generateDigitalArchivistReport(macKnowledgeVaultSnapshot);
-  const digitalTwin = buildDigitalTwin({ organization: activeOrganizationRecord, dashboard: data, knowledgeHealth, governance: governanceSnapshot, workflows, plugins: pluginMarketplace.installed, macKnowledgeVault: macKnowledgeVaultReport });
-  const simulationComparison = compareScenarios(digitalTwin, defaultExecutiveScenarios(digitalTwin));
+  const macKnowledgeVaultSnapshot =
+    await new MacGOLDInventoryProvider().loadSnapshot();
+  const macKnowledgeVaultReport = generateDigitalArchivistReport(
+    macKnowledgeVaultSnapshot,
+  );
+  const digitalTwin = buildDigitalTwin({
+    organization: activeOrganizationRecord,
+    dashboard: data,
+    knowledgeHealth,
+    governance: governanceSnapshot,
+    workflows,
+    plugins: pluginMarketplace.installed,
+    macKnowledgeVault: macKnowledgeVaultReport,
+  });
+  const simulationComparison = compareScenarios(
+    digitalTwin,
+    defaultExecutiveScenarios(digitalTwin),
+  );
   const simulationDashboard = buildSimulationDashboard(simulationComparison);
 
-const crmSnapshot = crmRuntime.synthesize({
-  organizationId: activeOrganizationRecord?.id,
-  now: new Date(),
-});
-  const financeSnapshot = financeOperationsRuntime.synthesize({ organizationId: activeOrganizationRecord?.id, now: new Date() });
-  const lawLibraryFundingSnapshot = lawLibraryFundingRuntime.synthesize({ now: new Date() });
-  const chiefOfStaffSnapshot = await chiefOfStaffRuntime.synthesize({ organization: activeOrganizationRecord, dashboard: data, executiveIntelligence: executiveSnapshot, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, knowledgeHealth, workflows, runtimeTools, runtimeSessions, runtimeMetrics, connectors, connectorSessions, connectorDiagnostics, operatingHistory, autonomousPlans: autonomyEngine.listPlans(), pendingApprovals: approvalEngine.list() }, { token: session.access_token, organizationId: activeOrganizationRecord?.id, profileId: session.user?.id });
-  const autonomousPlan = autonomyEngine.createExecutionPlan({ organization: activeOrganizationRecord ? { id: activeOrganizationRecord.id, name: activeOrganizationRecord.name } : null, executiveIntelligence: executiveSnapshot, workflows, runtimeTools, connectors, knowledgeHealth, platformHealth: diagnosticsSnapshot.health, diagnostics: diagnosticsSnapshot.diagnostics, operatingHistory, source: "dashboard" });
-  if (!autonomousScheduler.list().some((schedule) => schedule.planId === autonomousPlan.id)) autonomousScheduler.schedule(autonomousPlan.id, autonomousPlan.organizationId, { type: "delayed", delayMs: 300000 });
+  const crmSnapshot = crmRuntime.synthesize({
+    organizationId: activeOrganizationRecord?.id,
+    now: new Date(),
+  });
+  const financeSnapshot = financeOperationsRuntime.synthesize({
+    organizationId: activeOrganizationRecord?.id,
+    now: new Date(),
+  });
+  const lawLibraryFundingSnapshot = lawLibraryFundingRuntime.synthesize({
+    now: new Date(),
+  });
+  const chiefOfStaffSnapshot = await chiefOfStaffRuntime.synthesize(
+    {
+      organization: activeOrganizationRecord,
+      dashboard: data,
+      executiveIntelligence: executiveSnapshot,
+      platformHealth: diagnosticsSnapshot.health,
+      diagnostics: diagnosticsSnapshot.diagnostics,
+      knowledgeHealth,
+      workflows,
+      runtimeTools,
+      runtimeSessions,
+      runtimeMetrics,
+      connectors,
+      connectorSessions,
+      connectorDiagnostics,
+      operatingHistory,
+      autonomousPlans: autonomyEngine.listPlans(),
+      pendingApprovals: approvalEngine.list(),
+    },
+    {
+      token: session.access_token,
+      organizationId: activeOrganizationRecord?.id,
+      profileId: session.user?.id,
+    },
+  );
+  const autonomousPlan = autonomyEngine.createExecutionPlan({
+    organization: activeOrganizationRecord
+      ? { id: activeOrganizationRecord.id, name: activeOrganizationRecord.name }
+      : null,
+    executiveIntelligence: executiveSnapshot,
+    workflows,
+    runtimeTools,
+    connectors,
+    knowledgeHealth,
+    platformHealth: diagnosticsSnapshot.health,
+    diagnostics: diagnosticsSnapshot.diagnostics,
+    operatingHistory,
+    source: "dashboard",
+  });
+  if (
+    !autonomousScheduler
+      .list()
+      .some((schedule) => schedule.planId === autonomousPlan.id)
+  )
+    autonomousScheduler.schedule(
+      autonomousPlan.id,
+      autonomousPlan.organizationId,
+      { type: "delayed", delayMs: 300000 },
+    );
 
   return (
     <main className="shell executiveShell">
-      <Navigation activeOrganization={activeOrganization} memberships={memberships} returnTo={currentPath()} />
-      <DashboardHeader organizationCount={data.organizations.length} pendingApprovals={pendingApprovals} />
+      <Navigation
+        activeOrganization={activeOrganization}
+        memberships={memberships}
+        returnTo={currentPath()}
+      />
+      <DashboardHeader
+        organizationCount={data.organizations.length}
+        pendingApprovals={pendingApprovals}
+      />
       <CommandBar />
       <MetricsGrid metrics={metrics} />
-      <ExecutiveCommandCenter tasks={data.tasks} approvals={data.approvals} agents={data.agents} health={data.health} projects={data.projects} activity={data.activity} production={productionData} />
-      <EnterpriseOperationsPanel dashboard={data} production={productionData} organization={activeOrganizationRecord} />
-      <DepartmentOperationsDashboard production={productionData} tasks={data.tasks} approvals={data.approvals} health={data.health} />
+      <ExecutiveCommandCenter
+        tasks={data.tasks}
+        approvals={data.approvals}
+        agents={data.agents}
+        health={data.health}
+        projects={data.projects}
+        activity={data.activity}
+        production={productionData}
+      />
+      <EnterpriseOperationsPanel
+        dashboard={data}
+        production={productionData}
+        organization={activeOrganizationRecord}
+      />
+      <DepartmentOperationsDashboard
+        production={productionData}
+        tasks={data.tasks}
+        approvals={data.approvals}
+        health={data.health}
+      />
       <section className="grid twoColumn">
-        <ExecutiveBrief organization={activeOrganizationRecord} tasks={data.tasks} approvals={data.approvals} agents={data.agents} health={data.health} projects={data.projects} activity={data.activity} auditLogs={data.auditLogs} membershipCount={data.memberships.length} />
+        <ExecutiveBrief
+          organization={activeOrganizationRecord}
+          tasks={data.tasks}
+          approvals={data.approvals}
+          agents={data.agents}
+          health={data.health}
+          projects={data.projects}
+          activity={data.activity}
+          auditLogs={data.auditLogs}
+          membershipCount={data.memberships.length}
+        />
         <AttentionQueue items={attentionItems} />
       </section>
       <section className="grid twoColumn">
@@ -146,25 +376,71 @@ const crmSnapshot = crmRuntime.synthesize({
         <ExecutiveWorkflowPanel workflows={workflows} />
       </section>
       <KnowledgeDashboard health={knowledgeHealth} />
-      <AIRuntimePanel tools={runtimeTools} sessions={runtimeSessions} metrics={runtimeMetrics} />
-      <AIPlatformPanel models={aiModels} prompts={aiPrompts} tools={aiTools} mcpServers={mcpServers} sessions={aiTelemetry.sessions} costs={{ tokens: aiTelemetry.tokens, costUsd: aiTelemetry.costUsd, latencyMs: aiTelemetry.latencyMs }} />
+      <AIRuntimePanel
+        tools={runtimeTools}
+        sessions={runtimeSessions}
+        metrics={runtimeMetrics}
+      />
+      <AIPlatformPanel
+        models={aiModels}
+        prompts={aiPrompts}
+        tools={aiTools}
+        mcpServers={mcpServers}
+        sessions={aiTelemetry.sessions}
+        costs={{
+          tokens: aiTelemetry.tokens,
+          costUsd: aiTelemetry.costUsd,
+          latencyMs: aiTelemetry.latencyMs,
+        }}
+      />
       <AIIntegrationHubPanel dashboard={aiIntegrationDashboard} />
-      <AIOperationsPanel score={aiOperationsScore} items={{ aiReadiness: aiModels.length ? "ready" : "awaiting model registration", modelHealth: `${aiModels.length} registered`, mcpHealth: `${mcpServers.length} servers`, promptQuality: `${aiPrompts.length} versions`, toolReadiness: `${aiTools.length} tools`, executionEfficiency: `${aiTelemetry.sessions.completed} completed`, costEfficiency: `$${aiTelemetry.costUsd.toFixed(6)}` }} />
-      <EnterpriseConnectorsPanel connectors={connectors} sessions={connectorSessions} diagnostics={connectorDiagnostics} />
-      <DiagnosticsPanel health={diagnosticsSnapshot.health} diagnostics={diagnosticsSnapshot.diagnostics} />
+      <AIOperationsPanel
+        score={aiOperationsScore}
+        items={{
+          aiReadiness: aiModels.length
+            ? "ready"
+            : "awaiting model registration",
+          modelHealth: `${aiModels.length} registered`,
+          mcpHealth: `${mcpServers.length} servers`,
+          promptQuality: `${aiPrompts.length} versions`,
+          toolReadiness: `${aiTools.length} tools`,
+          executionEfficiency: `${aiTelemetry.sessions.completed} completed`,
+          costEfficiency: `$${aiTelemetry.costUsd.toFixed(6)}`,
+        }}
+      />
+      <EnterpriseConnectorsPanel
+        connectors={connectors}
+        sessions={connectorSessions}
+        diagnostics={connectorDiagnostics}
+      />
+      <LiveDataOnboardingPanel dashboard={liveDataOnboardingDashboard} />
+      <DiagnosticsPanel
+        health={diagnosticsSnapshot.health}
+        diagnostics={diagnosticsSnapshot.diagnostics}
+      />
       <ExecutiveIntelligenceDashboard snapshot={executiveSnapshot} />
-<ChiefOfStaffPanel snapshot={chiefOfStaffSnapshot} />
-<GrantDevelopmentPanel snapshot={grantSnapshot} />
-<CrmRelationshipPanel snapshot={crmSnapshot} />
-<MediaCommunicationsPanel snapshot={mediaSnapshot} />
-<FinanceOperationsPanel snapshot={financeSnapshot} />
-<LawLibraryFundingPanel snapshot={lawLibraryFundingSnapshot} />
-<LawLibraryOSPanel />
-<PluginMarketplacePanel marketplace={pluginMarketplace} />
-<EnterpriseGovernancePanel snapshot={governanceSnapshot} />
-<MacKnowledgeVaultPanel report={macKnowledgeVaultReport} />
-<DigitalTwinSimulationPanel twin={digitalTwin} comparison={simulationComparison} dashboard={simulationDashboard} />
-      <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
+      <ChiefOfStaffPanel snapshot={chiefOfStaffSnapshot} />
+      <GrantDevelopmentPanel snapshot={grantSnapshot} />
+      <CrmRelationshipPanel snapshot={crmSnapshot} />
+      <MediaCommunicationsPanel snapshot={mediaSnapshot} />
+      <FinanceOperationsPanel snapshot={financeSnapshot} />
+      <LawLibraryFundingPanel snapshot={lawLibraryFundingSnapshot} />
+      <LawLibraryOSPanel />
+      <PluginMarketplacePanel marketplace={pluginMarketplace} />
+      <EnterpriseGovernancePanel snapshot={governanceSnapshot} />
+      <MacKnowledgeVaultPanel report={macKnowledgeVaultReport} />
+      <DigitalTwinSimulationPanel
+        twin={digitalTwin}
+        comparison={simulationComparison}
+        dashboard={simulationDashboard}
+      />
+      <AutonomousOperationsPanel
+        plans={autonomyEngine.listPlans()}
+        approvals={approvalEngine.list()}
+        schedules={autonomousScheduler.list()}
+        retryQueue={retryEngine.list()}
+        recoveryQueue={recoveryEngine.list()}
+      />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
       <section className="grid twoColumn">
