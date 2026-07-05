@@ -1,4 +1,4 @@
-import { countPendingLiveDataApprovals, hasUnresolvedApprovalGates } from "./live-data-onboarding";
+import { buildLiveDataOnboardingSnapshot, countPendingLiveDataApprovals, hasUnresolvedApprovalGates } from "./live-data-onboarding";
 
 export function indexedMetadataOnlySourcesWithOpenGatesCountAsPendingApprovalsTest() {
   const pendingCount = countPendingLiveDataApprovals([
@@ -27,4 +27,17 @@ export function sourceStatusDoesNotSuppressUnresolvedApprovalGatesTest() {
 export function resolvedApprovalGatesAreNotPendingTest() {
   if (hasUnresolvedApprovalGates({ approvalGates: [{ id: "approved", status: "approved" }] })) throw new Error("Approved gates should be resolved.");
   if (hasUnresolvedApprovalGates({ approvalGates: [{ id: "resolved", status: "pending", resolvedAt: "2026-07-05T00:00:00.000Z" }] })) throw new Error("Gates with resolvedAt should be resolved.");
+}
+
+export function liveDataOnboardingSnapshotRemainsAdvisoryAndApprovalGatedTest() {
+  const snapshot = buildLiveDataOnboardingSnapshot([
+    { id: "mac-knowledge-vault", status: "indexed_metadata_only", approvalGates: [{ id: "approve-ai-exposure", status: "pending" }] },
+  ]);
+
+  if (snapshot.pendingApprovalCount !== 1) throw new Error("Unresolved Mac Knowledge Vault approval gates must remain counted before progression.");
+  if (snapshot.safety.automaticIngestion !== false) throw new Error("Live-data onboarding must not enable automatic ingestion.");
+  if (snapshot.safety.automaticAiExposure !== false) throw new Error("Live-data onboarding must not enable automatic AI exposure.");
+  if (snapshot.safety.destructiveActions !== false) throw new Error("Live-data onboarding must not enable destructive actions.");
+  if (snapshot.safety.approvalGatedProgressionOnly !== true) throw new Error("Live-data onboarding progression must remain approval-gated.");
+  if (!snapshot.nextSafeActions.some((action) => action.toLowerCase().includes("approval"))) throw new Error("Live-data onboarding must stay advisory and route progression through approvals.");
 }
