@@ -31,6 +31,7 @@ import { LawLibraryFundingPanel } from "../../components/law-library-funding/Law
 import { LawLibraryOSPanel } from "../../components/law-library-os/LawLibraryOSPanel";
 import { PluginMarketplacePanel } from "../../components/plugins/PluginMarketplacePanel";
 import { EnterpriseGovernancePanel } from "../../components/governance/EnterpriseGovernancePanel";
+import { DigitalTwinSimulationPanel } from "../../components/digital-twin/DigitalTwinSimulationPanel";
 import { AIPlatformPanel } from "../../components/ai/AIPlatformPanel";
 import { AIOperationsPanel } from "../../components/ai/AIOperationsPanel";
 import { AIIntegrationHubPanel } from "../../components/ai/AIIntegrationHubPanel";
@@ -58,6 +59,7 @@ import { modelRegistry, promptRegistry, toolRegistry, aiTelemetrySummary, aiInte
 import { mcpRegistry } from "../../lib/connectors/providers/mcp";
 import { marketplaceSnapshot } from "../../lib/plugins";
 import { buildGovernanceSnapshot } from "../../lib/governance";
+import { buildDigitalTwin, buildSimulationDashboard, compareScenarios, defaultExecutiveScenarios } from "../../lib/digital-twin";
 
 async function safeDiagnostics(token?: string | null, organizationId?: string | null) {
   try { return { health: await getPlatformHealth({ token, organizationId }), diagnostics: runDiagnostics() }; }
@@ -104,6 +106,9 @@ const mediaSnapshot = mediaRuntime.synthesize({
 
   const pluginMarketplace = marketplaceSnapshot();
   const governanceSnapshot = buildGovernanceSnapshot(new Date());
+  const digitalTwin = buildDigitalTwin({ organization: activeOrganizationRecord, dashboard: data, knowledgeHealth, governance: governanceSnapshot, workflows, plugins: pluginMarketplace.installed });
+  const simulationComparison = compareScenarios(digitalTwin, defaultExecutiveScenarios(digitalTwin));
+  const simulationDashboard = buildSimulationDashboard(simulationComparison);
 
 const crmSnapshot = crmRuntime.synthesize({
   organizationId: activeOrganizationRecord?.id,
@@ -153,6 +158,7 @@ const crmSnapshot = crmRuntime.synthesize({
 <LawLibraryOSPanel />
 <PluginMarketplacePanel marketplace={pluginMarketplace} />
 <EnterpriseGovernancePanel snapshot={governanceSnapshot} />
+<DigitalTwinSimulationPanel twin={digitalTwin} comparison={simulationComparison} dashboard={simulationDashboard} />
       <AutonomousOperationsPanel plans={autonomyEngine.listPlans()} approvals={approvalEngine.list()} schedules={autonomousScheduler.list()} retryQueue={retryEngine.list()} recoveryQueue={recoveryEngine.list()} />
       <OperatingHistory history={operatingHistory} />
       <OrganizationsWidget organizations={data.organizations} />
