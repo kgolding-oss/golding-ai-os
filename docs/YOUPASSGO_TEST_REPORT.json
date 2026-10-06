@@ -1,0 +1,15 @@
+{
+  "tested_on": "2026-10-06",
+  "typescript_version": "5.8.3",
+  "node_version": "22.16.0",
+  "strict_isolated_typecheck": "passed",
+  "typecheck_scope": "Provider and a copied subset of inspected repository Knowledge OS interfaces; Node type definitions supplied locally",
+  "synthetic_node_tests": {"passed": 20, "failed": 0, "skipped": 0},
+  "full_repository_build": "not_run",
+  "end_to_end_authentication_test": "not_run",
+  "live_deployment": "not_performed",
+  "actual_posts_imported": 0,
+  "actual_transcripts_imported": 0,
+  "actual_reviewed_summaries": 0,
+  "complete_scrape": false
+}

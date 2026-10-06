@@ -1,0 +1,45 @@
+{
+  "project": "YouPassGo",
+  "repository": "kgolding-oss/golding-ai-os",
+  "checked_on": "2026-10-06",
+  "requested_profile": "https://www.tiktok.com/@derrickpwhitehead",
+  "scope": "Public posts by the requested creator; no private posts, messages, deleted material or paid courses",
+  "status": "blocked_no_post_content_acquired",
+  "profile_snapshot": {
+    "provider": "Oriane via Firecrawl Alexandria",
+    "reported_post_count": 1133,
+    "is_verified_live_count": false,
+    "note": "Indexed profile metadata is not proof that these posts are accessible or indexed."
+  },
+  "posts_retrieved": 0,
+  "transcripts_retrieved": 0,
+  "reviewed_summaries": 0,
+  "expected_post_count": null,
+  "account_complete": false,
+  "brain_populated": false,
+  "live_deployment_changed": false,
+  "attempts": [
+    {"method": "Firecrawl direct scrape", "result": "TikTok is not supported"},
+    {"method": "Oriane TikTok profile lookup", "result": "Profile metadata returned"},
+    {"method": "Oriane TikTok posts search", "handle": "derrickpwhitehead", "projection": "full", "limit": 100, "offset": 0, "total_count": 0, "result": "No indexed posts; no additional page to fetch"},
+    {"method": "Firecrawl live-profile capability discovery", "result": "No matching live-ingestion tool"},
+    {"method": "Firecrawl browser interaction", "result": "TikTok is not supported"},
+    {"method": "Public web profile open and post search", "result": "No usable account post inventory or transcripts"}
+  ],
+  "implementation": {
+    "import_and_search_module": "written and isolated-tested",
+    "default_registry_modified": false,
+    "database_modified": false,
+    "model_connected_or_trained": false,
+    "recurring_job_started": false
+  },
+  "remaining": [
+    "Obtain an accessible, permitted source export or a collector that supports this account",
+    "Enumerate public posts with evidence of coverage",
+    "Acquire transcripts and relevant visual content",
+    "Create and review original source-linked summaries",
+    "Verify high-stakes claims against current primary sources",
+    "Integrate authenticated private storage, retrieval and model instructions",
+    "Run full application tests before activation"
+  ]
+}
